@@ -51,6 +51,9 @@ All levels appear an equal number of times.
 doe %>% count(electric)
 doe %>% count(warranty)
 doe %>% count(ford)
+
+doe %>% 
+  count(electric, ford)
 ```
 
 ## Orthogonal? 
