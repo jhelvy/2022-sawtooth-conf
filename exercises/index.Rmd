@@ -1,7 +1,10 @@
 ---
-title: "The cbcTools Package: Tools for Designing and Testing Choice-Based Conjoint Surveys in R"
+title: "DOE & Power Analysis"
+subtitle: "EMSE 6035: Marketing Analytics for Design Decisions"
+date: November 03, 2021
+week: 10
+class: "10-doe"
 author: "John Paul Helveston"
-date: May 06, 2022
 institute: "The George Washington University | Dept. of Engineering Management and Systems Engineering"
 output:
   xaringan::moon_reader:
@@ -9,22 +12,23 @@ output:
       - default
       - css/lexis.css
       - css/lexis-fonts.css
-      - css/custom.css
     lib_dir: libs
+    seal: false
     nature:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
       ratio: "16:9"
-    seal: false
 ---
 
 ```{r setup, include=FALSE}
 library(knitr)
-library(fontawesome)
 library(tidyverse)
+library(fontawesome)
+library(kableExtra)
+library(countdown)
 library(metathis)
-library(logitr)
+library(here)
 
 options(
   htmltools.dir.version = FALSE,
@@ -47,7 +51,7 @@ knitr::opts_chunk$set(
 
 # Setup xaringanExtra options
 xaringanExtra::use_xaringan_extra(c(
-  "tile_view", "panelset", "share_again"))
+  "tile_view", "panelset", "share_again", "clipboard"))
 xaringanExtra::style_share_again(share_buttons = "none")
 xaringanExtra::use_extra_styles(
   hover_code_line = TRUE,
@@ -60,50 +64,88 @@ meta() %>%
     description = rmarkdown::metadata$subtitle,
     generator = "xaringan and remark.js"
   ) %>%
-  meta_name("github-repo" = "jhelvy/2022-sawtooth-conf") %>%
+  meta_name("github-repo" = "emse-madd-gwu/2021-Fall") %>%
   meta_social(
     title = rmarkdown::metadata$title,
-    url = "https://jhelvy.com",
+    url = "https://madd.seas.gwu.edu/2021-Fall/",
     og_type = "website",
     og_author = "John Paul Helveston",
     twitter_card_type = "summary_large_image",
     twitter_creator = "@johnhelveston"
   )
 
-knitr::opts_chunk$set(
-    warning = FALSE,
-    message = FALSE,
-    comment = "#>",
-    fig.path = "figs/",
-    fig.retina = 3 # Better figure resolution
-)
+# Setup class-specific paths
+class <- rmarkdown::metadata$class
+root <- paste0("https://madd.seas.gwu.edu/2021-Fall/class/", class, "/")
+path_slides <- file.path("class", class, "index.html")
+path_pdf <- paste0(root, class, ".pdf")
+path_notes <- paste0(root, class, ".zip")
 ```
 
-layout: true
+class: middle, inverse
 
-<!-- this adds the link footer to all slides, depends on my-footer class in css-->
+.leftcol30[
+<center>
+<img src="https://github.com/emse-madd-gwu/emse-madd-gwu.github.io/raw/master/images/madd_hex_sticker.png" width=250>
+</center>
+]
 
-<div class="footer-small">
-<span>
-https://github.com/jhelvy/2022-sawtooth-conf
-</span>
-</div>
+.rightcol70[
+# Week `r rmarkdown::metadata$week`: .fancy[`r rmarkdown::metadata$title`]
+
+### `r fontawesome::fa(name = "university", fill = "white")` `r rmarkdown::metadata$subtitle`
+### `r fontawesome::fa(name = "user", fill = "white")` `r rmarkdown::metadata$author`
+### `r fontawesome::fa(name = "calendar-alt", fill = "white")` `r rmarkdown::metadata$date`
+]
 
 ---
 
-name: title-slide
-class: inverse, middle
-background-image: url(images/blue.jpg)
+class: inverse
 
-# The `cbcTools` Package <a href='https://jhelvy.github.io/cbcTools/'><img src='images/logo.png' align="right" height="250"/></a>
+# Quiz 4
 
-## Tools for Designing and Testing<br>Choice-Based Conjoint Surveys in `r fa("r-project", fill = "white")`
+```{r, echo=FALSE}
+countdown(
+    minutes = 10,
+    warn_when = 30,
+    update_every = 1,
+    bottom = 0,
+    left = 0,
+    font_size = '4em'
+)
+```
 
-### by John Paul Helveston
+.leftcol[
+### Make sure to download the zip file on the first page!
+]
 
-Sawtooth Software Conference
+.rightcol[
+<center>
+<img src="images/quiz_doge.png" width="400">
+</center>
+]
 
-May 06, 2022
+---
+
+```{r child="topics/0.Rmd"}
+```
+
+---
+
+```{r child="topics/1.Rmd"}
+```
+
+---
+
+class: center, middle 
+
+# Before we start, re-install {conjointTools}
+
+.code100[
+```{r, eval=FALSE}
+remotes::install_github("jhelvy/conjointTools")
+```
+]
 
 ---
 
@@ -145,11 +187,11 @@ class: center
 
 .leftcol40[
 $$
-ME(a) =
+ME(a) = 
 $$
 
 $$
-\left( \frac{A + AB + AC + ABC}{4}\right) -
+\left( \frac{A + AB + AC + ABC}{4}\right) - 
 $$
 
 $$
@@ -171,11 +213,11 @@ class: center
 
 .leftcol[
 $$
-INT(ab) =
+INT(ab) = 
 $$
 
 $$
-\frac{1}{2}\left[ \left( \frac{AB + ABC}{2}\right) - \left( \frac{B + BC}{2}\right) \right] -
+\frac{1}{2}\left[ \left( \frac{AB + ABC}{2}\right) - \left( \frac{B + BC}{2}\right) \right] - 
 $$
 
 $$
@@ -197,9 +239,9 @@ $$
 
 meat | wine
 -----|------
-fish | white
+fish | white 
 fish | red
-steak | white
+steak | white 
 steak | red
 
 ]
@@ -221,7 +263,7 @@ steak | red
 
 ---
 
-class: center, middle
+class: center, middle 
 
 # Open `winePairings.Rmd`
 
@@ -267,7 +309,7 @@ recodeDoe(doe, levels)
 
 All levels appear an equal number of times.
 
-## Orthogonal?
+## Orthogonal? 
 
 All pairs of levels appear together an equal number of times.
 ]
@@ -297,7 +339,7 @@ doe
 
 All levels appear an equal number of times.
 
-## Orthogonal?
+## Orthogonal? 
 
 All pairs of levels appear together an equal number of times.
 ]
@@ -310,11 +352,85 @@ doe[c(1, 3, 5, 6),]
 
 ---
 
-class: center, middle
+class: center, middle 
 
 # Comparing Full and Fractional Factorial Designs
 
 # Open `cars.Rmd`
+
+---
+
+class: inverse
+
+# Practice Question 1
+
+.leftcol[
+Consider the following experiment design
+
+a | b | c | Effect
+--|---|---|-------
++ | - | - | A
+- | + | - | B 
++ | - | + | AC 
+- | + | + | BC 
+
+]
+
+.rightcol[
+
+a) Is the design balanced? Is is orthogonal?
+
+b) Write out the equation to compute the main effect for a, b, and c. 
+
+c) Are any main effects confounded? If so, what are they confounded with?
+]
+
+---
+
+class: inverse, center
+
+# .fancy[Break]
+
+```{r, echo=FALSE}
+countdown(minutes = 5,
+          warn_when = 30,
+          update_every = 1,
+          left = 0, right = 0, top = 1, bottom = 0,
+          margin = "5%",
+          font_size = "8em")
+```
+
+---
+
+```{r child="topics/2.Rmd"}
+```
+
+---
+
+class: center
+
+## We want to find $\boldsymbol{\beta}$ by maximizing the log-likelihood
+
+<center>
+<img src="images/mle1.png" width=1000>
+<img src="images/mle2.png" width=500>
+</center>
+
+---
+
+class: center
+
+### Covariance of $\boldsymbol{\beta}$ inversely related to matrix of 2nd derivatives
+
+<center>
+<img src="images/covariance.png" width=400>
+</center>
+
+--
+
+### Negative of the hessian evaluated at the MLE<br>solution is the **"Observed Information Matrix"**
+
+## $$\boldsymbol{I}(\boldsymbol{\beta}) = - \nabla_{\boldsymbol{\beta}}^2 \ln (\mathcal{L})$$
 
 ---
 
@@ -333,7 +449,7 @@ where $p$ is the number of coefficients in the model and $n$ is the total sample
 
 ---
 
-class: center, middle
+class: center, middle 
 
 # Finding Efficient Designs
 
@@ -342,6 +458,17 @@ class: center, middle
 ---
 
 class: inverse
+
+```{r, echo=FALSE}
+countdown(
+  minutes = 20,
+  warn_when = 15,
+  update_every = 1,
+  top = 0,
+  right = 0,
+  font_size = '2em'
+)
+```
 
 ## Your Turn
 
@@ -355,13 +482,18 @@ class: inverse
 
 ---
 
-class: center, middle
+```{r child="topics/3.Rmd"}
+```
+
+---
+
+class: center, middle 
 
 # How many respondents do I need?
 
 ---
 
-class: center, middle
+class: center, middle 
 
 # How many respondents do I need<br>_to get X level of precision on $\boldsymbol{\beta}$_?
 
@@ -390,7 +522,7 @@ Standard errors also decrease with:
 
 ---
 
-class: center, middle
+class: center, middle 
 
 ## Using {conjointTools}, we can run simulations to determine the necessary sample size for a specific model
 
@@ -398,35 +530,36 @@ class: center, middle
 
 ---
 
-class: center, middle
+class: inverse
+
+```{r, echo=FALSE}
+countdown(
+  minutes = 20,
+  warn_when = 15,
+  update_every = 1,
+  top = 0,
+  right = 0,
+  font_size = '2em'
+)
+```
+
+## Your Turn
+
+.leftcol80[
+Individually: 
+
+1. Using your design of experiment you just created in the last practice, conduct a power analysis to determine the necessary sample size to achieve a 0.05 significance level on your parameter estimates.
+
+2. Compare your results with your teammates.
+]
+
+---
+
+```{r child="topics/4.Rmd"}
+```
+
+---
+
+class: center, middle 
 
 # Open `powerAnalysis_interactions.Rmd`
-
----
-
-class: inverse
-background-image: url(images/blue.jpg)
-
-<br>
-
-# .center[.font150[Thanks!]]
-
-### `cbcTools` documentation: https://jhelvy.github.io/cbcTools/
-
-### Slides: https://jhelvy.github.io/2022-sawtooth-conf
-
-.footer-large[
-.right[
-@johnhelveston `r fa(name = "twitter", fill = "white")`<br>
-@jhelvy `r fa(name = "github", fill = "white")`<br>
-@jhelvy `r fa(name = "weixin", fill = "white")`<br>
-jhelvy.com `r fa(name = "link", fill = "white")`<br>
-jph@gwu.edu `r fa(name = "paper-plane", fill = "white")`
-]]
-
----
-
-class: center, middle, inverse 
-
-# Extra slides
-
