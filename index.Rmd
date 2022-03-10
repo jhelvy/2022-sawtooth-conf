@@ -95,7 +95,7 @@ name: title-slide
 class: inverse, middle
 background-image: url(images/blue.jpg)
 
-# The `cbcTools` Package <a href='https://jhelvy.github.io/cbcTools/'><img src='images/logo.png' align="right" height="250"/></a>
+# The `cbcTools` Package <a href='https://jhelvy.github.io/cbcTools/'><img src='images/logo.png' align="right" height="300"/></a>
 
 ## Tools for Designing and Testing<br>Choice-Based Conjoint Surveys in `r fa("r-project", fill = "white")`
 
@@ -110,6 +110,8 @@ May 06, 2022
 class: center
 
 ### Designing a Choice-Based Conjoint Survey is Hard
+
+--
 
 <center>
 <img src="images/tradeoffs1.png" width=95%>
