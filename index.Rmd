@@ -25,6 +25,7 @@ library(fontawesome)
 library(tidyverse)
 library(metathis)
 library(logitr)
+library(cbcTools)
 
 options(
   htmltools.dir.version = FALSE,
@@ -114,7 +115,7 @@ class: center
 --
 
 <center>
-<img src="images/tradeoffs1.png" width=95%>
+<img src="images/tradeoffs1.png" width=90%>
 </center>
 
 ---
@@ -124,7 +125,7 @@ class: center
 ### Designing a Choice-Based Conjoint Survey is Hard
 
 <center>
-<img src="images/tradeoffs2.png" width=95%>
+<img src="images/tradeoffs2.png" width=90%>
 </center>
 
 ---
@@ -134,12 +135,102 @@ class: center
 ### Designing a Choice-Based Conjoint Survey is Hard
 
 <center>
-<img src="images/tradeoffs3.png" width=95%>
+<img src="images/tradeoffs3.png" width=90%>
 </center>
 
 ---
 
-Example: GM, BMW, Ferrari 
+# .center[A simple conjoint experiment about _cars_]
+
+Attribute | Levels
+----------|----------
+Brand     | GW, BMW, Ferrari 
+Price     | $20k, $40k, $100k
+
+.center[**Design: .red[9] choice sets, .blue[3] alternatives each**]
+
+--
+
+.leftcol[
+
+```
+Attribute counts:
+
+brand:
+  GM   BMW  Ferrari 
+  10    11    6 
+
+price:
+
+ 20k  40k 100k 
+  9    9   9
+```
+
+]
+
+--
+
+.rightcol[
+
+```
+Pairwise attribute counts:
+
+brand & price:
+         
+          20k 40k 100k
+  GM        3   0    7
+  BMW       4   5    2
+  Ferrari   2   4    0
+```
+
+]
+
+---
+
+# .center[A simple conjoint experiment about _cars_]
+
+Attribute | Levels
+----------|----------
+Brand     | GW, BMW, Ferrari 
+Price     | $20k, $40k, $100k
+
+.center[**Design: .red[900] choice sets, .blue[3] alternatives each**]
+
+--
+
+.leftcol[
+
+```
+Attribute counts:
+
+brand:
+  GM    BMW   Ferrari 
+  925   910     865 
+
+price:
+
+  20k  40k 100k 
+  889  913  898 
+```
+
+]
+
+--
+
+.rightcol[
+
+```
+Pairwise attribute counts:
+
+brand & price:
+         
+          20k 40k 100k
+  GM      308 317  300
+  BMW     311 306  293
+  Ferrari 270 290  305
+```
+
+]
 
 ---
 
