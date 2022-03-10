@@ -1,6 +1,5 @@
 library(cbcTools)
 
-
 # Define the attributes and levels
 levels <- list(
   brand = c("GM", "BMW", "Ferrari"),
@@ -13,17 +12,52 @@ design <- cbc_design(
   profiles = profiles,
   n_resp   = 3, # Number of respondents
   n_alts   = 3, # Number of alternatives per question
-  n_q      = 3 # Number of questions per respondent
+  n_q      = 3  # Number of questions per respondent
 )
 
 cbc_balance(design)
 cbc_overlap(design)
 
-# A simple conjoint experiment about apples
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3, # Number of alternatives per question
+  n_q      = 3  # Number of questions per respondent
+)
+
+cbc_balance(design)
+cbc_overlap(design)
 
 
+# Sim data with and without interaction
 
-# Design the survey ----
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list(
+    price = c(-1, -3),
+    brand = c(1, 2)
+  )
+)
+
+model <- logitr(
+  data = data, 
+  obsID = 'obsID', 
+  outcome = 'choice',
+  pars = c('price', 'brand', 'price*brand')
+)
+
+summary(model)
+
+data_int <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list(
+    price = c(-1, -3),
+    brand = c(1, 2), 
+    `price*brand` = c()
+  )
+)
 
 # Define the attributes and levels
 levels <- list(
