@@ -320,32 +320,60 @@ brand & price:
 
 ---
 
-We can use {cbcTools} to address these questions **before** fielding our survey
-
----
-
 class: middle, center, inverse 
 
-The {cbcTools} package
+# The `cbcTools` Package 
+
+<center>
+<img src="images/logo.png" width=30%>
+</center>
 
 ---
 
-Basics 
-
-All functions start with `cbc_`
-
-[screenshot of helper pop up]
+background-image: url("images/process.png")
 
 ---
 
-Workflow:
+background-image: url("images/process_labels.png")
 
-- Set levels 
-- Make profiles 
-- Make design 
-- Inspect design
-- Simulate choices
-- Assess power
+---
+
+class: center, middle 
+background-image: url("images/process_labels.png")
+
+.border[
+<center>
+<img src="images/cbc_screenshot.png" width=80%>
+</center>
+]
+
+---
+
+background-image: url("images/process_levels.png")
+
+---
+
+
+
+---
+
+background-image: url("images/process_profiles.png")
+
+---
+
+background-image: url("images/process_design.png")
+
+---
+
+background-image: url("images/process_inspect.png")
+
+---
+
+background-image: url("images/process_choices.png")
+
+---
+
+background-image: url("images/process_power.png")
 
 ---
 
