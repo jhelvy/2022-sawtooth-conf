@@ -238,6 +238,20 @@ D-efficient design with priors
 
 In this case we might not want perfect balance because there are certain combinations that shouldn't show up as often.
 
+
+---
+
+D-effcient design balance
+
+
+---
+
+left(random, no int) right(d-eff, no int)
+
+---
+
+left(random, int) right(d-eff, int)
+
 ---
 
 # .center[But what about other factors?]
@@ -261,10 +275,6 @@ In this case we might not want perfect balance because there are certain combina
 ---
 
 We can use {cbcTools} to address these questions **before** fielding our survey
-
-(show image comparing different power curves for different designs)
-
-left(no int) right(int)
 
 ---
 
