@@ -47,7 +47,7 @@ design <- cbc_design(
 # Make D-efficient design with priors using {idefix} ----
 
 cs <- Profiles(lvls = c(3, 3), coding = c("D", "D"))
-mu <- c(1, 2, -1, -4)
+mu <- c(0, 0, 0, 0)
 sigma <- diag(length(mu))
 M <- MASS::mvrnorm(n = 1000, mu = mu, Sigma = sigma)
 D <- Modfed(
@@ -64,6 +64,11 @@ design_deff$brand <- temp$V1
 design_deff$price <- temp$V2
 design_deff$brand <- factor(design_deff$brand, levels$brand)
 design_deff$price <- factor(design_deff$price, levels$price)
+
+# Compare balance
+
+cbc_balance(design)
+cbc_balance(design_deff)
 
 # Sim data without interaction ----
 
@@ -84,9 +89,6 @@ data_deff <- cbc_choices(
     brand = c(1, 2)
   )
 )
-
-cbc_balance(design)
-cbc_balance(design_deff)
 
 # Check capture
 
@@ -210,7 +212,7 @@ results %>%
     y = "Standard error"
   )
 
-ggsave(file.path("images", "desing_compare.png"), width = 8, height = 4)
+ggsave(file.path("images", "design_compare.png"), width = 9, height = 4)
 
 results_int %>% 
   mutate(type = "Random Design") %>% 
@@ -233,7 +235,7 @@ results_int %>%
     y = "Standard error"
   )
 
-ggsave(file.path("images", "desing_compare_int.png"), width = 8, height = 4)
+ggsave(file.path("images", "design_compare_int.png"), width = 9, height = 4)
 
 
 

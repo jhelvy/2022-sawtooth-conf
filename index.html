@@ -153,7 +153,7 @@ Attribute | Levels
 Brand     | GW, BMW, Ferrari 
 Price     | $20k, $40k, $100k
 
-.center[**Design: .red[900] choice sets, .blue[3] alternatives each**]
+.center[**Design: .red[90] choice sets, .blue[3] alternatives each**]
 
 --
 
@@ -164,12 +164,12 @@ Attribute counts:
 
 brand:
   GM    BMW   Ferrari 
-  925   910     865 
+  92    80     98
 
 price:
 
   20k  40k 100k 
-  889  913  898 
+  91   84   95 
 ```
 
 ]
@@ -184,43 +184,102 @@ Pairwise attribute counts:
 brand &amp; price:
          
           20k 40k 100k
-  GM      308 317  300
-  BMW     311 306  293
-  Ferrari 270 290  305
+  GM      31  31  30
+  BMW     25  25  30
+  Ferrari 35  28  35
 ```
 
 ]
 
 ---
 
+# .center[D-efficient designs]
 
-Balance
+### .center[Attempts to maximize information on "Main Effects"]
 
---&gt; Increase size to improve
+--
 
+.leftcol[
+
+```
+Attribute counts:
+
+brand:
+  GM    BMW   Ferrari 
+  90    90     90 
+
+price:
+
+  20k  40k 100k 
+  90   90  90
+```
+
+]
+
+--
+
+.rightcol[
+
+```
+Pairwise attribute counts:
+
+brand &amp; price:
+         
+          20k 40k 100k
+  GM      30  30  30
+  BMW     30  30  30
+  Ferrari 30  30  30
+```
+
+]
 
 ---
 
-D-efficient design with priors 
+# .center[D-efficient designs]
 
-In this case we might not want perfect balance because there are certain combinations that shouldn't show up as often. 
+### .center[Attempts to maximize information on .red[Main Effects]]
+
+--
+
+&lt;center&gt;
+&lt;img src="images/design_compare.png" width=80%&gt;
+&lt;/center&gt;
 
 ---
 
-But what about other factors?
+# .center[D-efficient designs]
+
+### .center[...but .red[interaction effects] are confounded in D-efficient designs]
+
+--
+
+&lt;center&gt;
+&lt;img src="images/design_compare_int.png" width=80%&gt;
+&lt;/center&gt;
+
+---
+
+# .center[But what about other factors?]
+
+&lt;br&gt;
 
 - What if I add one more choice question to each respondent?
+
+--
+
 - What if I increase the number of alternatives per choice question?
+
+--
+
 - What if I use a labeled design?
-- What if there are interactions?
+
+--
+
+- What if there are interaction effects?
 
 ---
 
 We can use {cbcTools} to address these questions **before** fielding our survey
-
-(show image comparing different power curves for different designs)
-
-left(no int) right(int)
 
 ---
 
@@ -317,25 +376,6 @@ jph@gwu.edu <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="heig
 class: center, middle, inverse 
 
 # Extra slides
-
-
-
-
-
-
-
-Orthogonality
-
-    Each attribute level appears an equal number of times in combination with all other attribute levels.
-
-Balance
-
-    Each level within an attribute to appear an equal number of times.
-
-Overlap
-
-    When a set of alternatives has the same level for a given attribute (simplifies decision process for respondents).
-    Overlap thus can improve response efficiency but also reduce design efficiency.
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
