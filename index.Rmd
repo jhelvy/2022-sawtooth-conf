@@ -371,22 +371,3 @@ jph@gwu.edu `r fa(name = "paper-plane", fill = "white")`
 class: center, middle, inverse 
 
 # Extra slides
-
-
-
-
-
-
-
-Orthogonality
-
-    Each attribute level appears an equal number of times in combination with all other attribute levels.
-
-Balance
-
-    Each level within an attribute to appear an equal number of times.
-
-Overlap
-
-    When a set of alternatives has the same level for a given attribute (simplifies decision process for respondents).
-    Overlap thus can improve response efficiency but also reduce design efficiency.

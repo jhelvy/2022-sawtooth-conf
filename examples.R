@@ -1,4 +1,11 @@
+set.seed(5678)
+
 library(cbcTools)
+library(idefix)
+library(logitr)
+library(jph)
+library(tidyverse)
+library(fastDummies)
 
 # Define the attributes and levels
 levels <- list(
@@ -20,7 +27,7 @@ cbc_overlap(design)
 
 design <- cbc_design(
   profiles = profiles,
-  n_resp   = 300, # Number of respondents
+  n_resp   = 30, # Number of respondents
   n_alts   = 3, # Number of alternatives per question
   n_q      = 3  # Number of questions per respondent
 )
@@ -28,36 +35,216 @@ design <- cbc_design(
 cbc_balance(design)
 cbc_overlap(design)
 
+# Make randomized design ----
 
-# Sim data with and without interaction
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 1200, # Number of respondents
+  n_alts   = 3, # Number of alternatives per question
+  n_q      = 3  # Number of questions per respondent
+)
+
+# Make D-efficient design with priors using {idefix} ----
+
+cs <- Profiles(lvls = c(3, 3), coding = c("D", "D"))
+mu <- c(1, 2, -1, -4)
+sigma <- diag(length(mu))
+M <- MASS::mvrnorm(n = 1000, mu = mu, Sigma = sigma)
+D <- Modfed(
+  cand.set = cs, 
+  n.sets = 9,
+  n.alts = 3, 
+  alt.cte = c(0, 0, 0), 
+  par.draws = rep(0, ncol(cs))
+)
+DD <- Decode(des = D$design, lvl.names = levels, coding = c("D", "D"), n.alts = 3)
+temp <- rep_df(DD$design, nrow(design) / nrow(DD$design))
+design_deff <- design 
+design_deff$brand <- temp$V1
+design_deff$price <- temp$V2
+design_deff$brand <- factor(design_deff$brand, levels$brand)
+design_deff$price <- factor(design_deff$price, levels$price)
+
+# Sim data without interaction ----
 
 data <- cbc_choices(
   design = design,
   obsID = "obsID",
   priors = list(
-    price = c(-1, -3),
+    price = c(-1, -4),
     brand = c(1, 2)
   )
 )
+
+data_deff <- cbc_choices(
+  design = design_deff,
+  obsID = "obsID",
+  priors = list(
+    price = c(-1, -4),
+    brand = c(1, 2)
+  )
+)
+
+cbc_balance(design)
+cbc_balance(design_deff)
+
+# Check capture
 
 model <- logitr(
   data = data, 
   obsID = 'obsID', 
   outcome = 'choice',
-  pars = c('price', 'brand', 'price*brand')
+  pars = c('price', 'brand')
+)
+
+model_deff <- logitr(
+  data = data_deff, 
+  obsID = 'obsID', 
+  outcome = 'choice',
+  pars = c('price', 'brand')
 )
 
 summary(model)
+summary(model_deff)
+
+# Sim data with interaction ----
 
 data_int <- cbc_choices(
   design = design,
   obsID = "obsID",
   priors = list(
-    price = c(-1, -3),
+    price = c(-1, -4),
     brand = c(1, 2), 
-    `price*brand` = c()
+    `price*brand` = c(0.25, 0.5, 0.5, 1)
   )
 )
+
+data_int_deff <- cbc_choices(
+  design = design_deff,
+  obsID = "obsID",
+  priors = list(
+    price = c(-1, -4),
+    brand = c(1, 2), 
+    `price*brand` = c(0.25, 0.5, 0.5, 1)
+  )
+)
+
+# Check capture
+
+model_int <- logitr(
+  data = data_int, 
+  obsID = 'obsID', 
+  outcome = 'choice',
+  pars = c('price', 'brand', 'price*brand')
+)
+
+model_int_deff <- logitr(
+  data = data_int_deff, 
+  obsID = 'obsID', 
+  outcome = 'choice',
+  pars = c('price', 'brand', 'price*brand')
+)
+
+summary(model_int)
+summary(model_int_deff)
+
+# Power analysis on a design ----
+
+# Estimate models with different sample sizes
+results <- cbc_power(
+  nbreaks = 10,
+  n_q     = 3,
+  data    = data,
+  pars    = c("price", "brand"),
+  outcome = "choice",
+  obsID   = "obsID"
+)
+
+results_deff <- cbc_power(
+  nbreaks = 10,
+  n_q     = 3,
+  data    = data_deff,
+  pars    = c("price", "brand"),
+  outcome = "choice",
+  obsID   = "obsID"
+)
+
+results_int <- cbc_power(
+  nbreaks = 10,
+  n_q     = 3,
+  data    = data_int,
+  pars    = c("price", "brand", "price*brand"),
+  outcome = "choice",
+  obsID   = "obsID"
+)
+
+results_int_deff <- cbc_power(
+  nbreaks = 10,
+  n_q     = 3,
+  data    = data_int_deff,
+  pars    = c("price", "brand", "price*brand"),
+  outcome = "choice",
+  obsID   = "obsID"
+)
+
+# Visualize
+
+results %>% 
+  mutate(type = "Random Design") %>% 
+  rbind(results_deff %>% mutate(type = "D-efficient Design")) %>% 
+  ggplot() +
+  geom_hline(yintercept = 0.05, color = "red", linetype = 2) +
+  geom_point(
+    aes(x = sampleSize, y = se, color = coef),
+    size = 1.8
+  ) +
+  facet_wrap(vars(type), ncol = 2) +
+  scale_x_continuous(limits = c(0, 1250)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  expand_limits(y = 0) +
+  theme_bw(base_size = 14) +
+  theme(panel.grid.minor = element_blank()) +
+  labs(
+    color = "Coefficient",
+    x = "Sample size",
+    y = "Standard error"
+  )
+
+ggsave(file.path("images", "desing_compare.png"), width = 8, height = 4)
+
+results_int %>% 
+  mutate(type = "Random Design") %>% 
+  rbind(results_int_deff %>% mutate(type = "D-efficient Design")) %>% 
+  ggplot() +
+  geom_hline(yintercept = 0.05, color = "red", linetype = 2) +
+  geom_point(
+    aes(x = sampleSize, y = se, color = coef),
+    size = 1.8
+  ) +
+  facet_wrap(vars(type), ncol = 2) +
+  scale_x_continuous(limits = c(0, 1250)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  expand_limits(y = 0) +
+  theme_bw(base_size = 14) +
+  theme(panel.grid.minor = element_blank()) +
+  labs(
+    color = "Coefficient",
+    x = "Sample size",
+    y = "Standard error"
+  )
+
+ggsave(file.path("images", "desing_compare_int.png"), width = 8, height = 4)
+
+
+
+
+
+
+
+
+
+
+
 
 # Define the attributes and levels
 levels <- list(
@@ -176,21 +363,3 @@ data_prior_mixed <- cbc_choices(
 
 
 
-# Power analysis on a design ----
-
-# Estimate models with different sample sizes
-results <- cbc_power(
-  nbreaks = 10,
-  n_q     = 6,
-  data    = data_rand,
-  pars    = c("price", "type", "freshness"),
-  outcome = "choice",
-  obsID   = "obsID"
-)
-
-# Preview
-head(results)
-tail(results)
-
-# Visualize
-plot(results)
