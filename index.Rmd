@@ -28,22 +28,20 @@ library(logitr)
 library(cbcTools)
 
 options(
-  htmltools.dir.version = FALSE,
-  knitr.table.format = "html",
-  knitr.kable.NA = '',
-  dplyr.width = Inf,
-  width = 250
+    htmltools.dir.version = FALSE,
+    knitr.table.format = "html",
+    knitr.kable.NA = '',
+    dplyr.width = Inf,
+    width = 250
 )
-
 knitr::opts_chunk$set(
-  cache = FALSE,
-  warning = FALSE,
-  message = FALSE,
-  fig.path = "figs/",
-  fig.width = 7.252,
-  fig.height = 4,
-  comment = "#>",
-  fig.retina = 3
+    warning = FALSE,
+    message = FALSE,
+    fig.path = "figs/",
+    fig.width = 7.252,
+    fig.height = 4,
+    comment = "#>",
+    fig.retina = 3
 )
 
 # Setup xaringanExtra options
@@ -353,7 +351,23 @@ background-image: url("images/process_levels.png")
 
 ---
 
+# .center[Define the attributes and levels]
 
+<br>
+
+```{r}
+levels <- list(
+  price     = c(1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00), # $ per pound
+  type      = c("Fuji", "Gala", "Honeycrisp"),
+  freshness = c("Excellent", "Average", "Poor")
+)
+```
+
+--
+
+```{r}
+levels
+```
 
 ---
 
@@ -361,7 +375,118 @@ background-image: url("images/process_profiles.png")
 
 ---
 
+# .center[Generate all possible profiles]
+
+<br>
+
+```{r}
+profiles <- cbc_profiles(levels)
+```
+
+--
+
+.leftcol[
+
+```{r}
+head(profiles)
+```
+
+]
+
+.rightcol[
+
+```{r}
+tail(profiles)
+```
+
+]
+
+---
+
 background-image: url("images/process_design.png")
+
+---
+
+# .center[Generate a survey design]
+
+```{r}
+design <- cbc_design( 
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6    # Number of questions per respondent
+)
+```
+
+--
+
+```{r}
+head(design)
+```
+
+---
+
+# .center[Include a "no choice" option]
+
+```{r}
+design <- cbc_design(
+  profiles  = profiles,
+  n_resp    = 300, # Number of respondents
+  n_alts    = 3,   # Number of alternatives per question
+  n_q       = 6,    # Number of questions per respondent
+  no_choice = TRUE #<<
+)
+```
+
+--
+
+```{r}
+head(design)
+```
+
+---
+
+# .center[Make a labeled design]
+
+```{r}
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6,    # Number of questions per respondent
+  label    = "type" #<<
+)
+```
+
+--
+
+```{r}
+head(design)
+```
+
+---
+
+# .center[Make a D-efficient design (coming soon!)]
+
+```{r, eval=FALSE}
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6,    # Number of questions per respondent
+  d_eff    = TRUE #<<
+)
+```
+
+--
+
+<br>
+
+## - Check out the [`idefix`](https://www.jstatsoft.org/article/view/v096i03) package
+
+--
+
+## - Import a design: .darkblue[Sawtooth] `r fa("arrow-right")` `r fa("file-csv", fill = "darkgreen")` `r fa("arrow-right")` `r fa("r-project", fill = "darkblue")`
 
 ---
 
@@ -369,7 +494,183 @@ background-image: url("images/process_inspect.png")
 
 ---
 
+# .center[Check design **balance**]
+
+```{r, eval=FALSE}
+cbc_balance(design)
+```
+
+--
+
+.leftcol[
+
+```
+Attribute counts:
+
+price:
+
+      1 1.5   2 2.5   3 3.5   4 
+    825 797 743 743 767 779 746 
+
+type:
+
+    Fuji       Gala Honeycrisp 
+    1842       1769       1789 
+
+freshness:
+  
+    Excellent   Average      Poor 
+         1813      1775      1812 
+```
+
+]
+
+--
+
+.rightcol[
+
+```
+Pairwise attribute counts:
+
+price & type:
+     
+      Fuji Gala Honeycrisp
+  1    304  252        269
+  1.5  274  251        272
+  2    257  254        232
+  2.5  240  254        249
+  3    249  263        255
+  3.5  257  250        272
+  4    261  245        240
+```
+
+]
+
+---
+
+# .center[Check design **overlap**]
+
+```{r, eval=FALSE}
+cbc_overlap(design)
+```
+
+--
+
+.leftcol[
+
+```
+Counts of attribute overlap:
+(# of questions with N unique levels)
+
+price:
+
+     1    2    3 
+    31  630 1139 
+
+type:
+
+     1    2    3 
+   156 1248  396 
+
+freshness:
+
+     1    2    3 
+   175 1189  436 
+```
+
+]
+
+---
+
 background-image: url("images/process_choices.png")
+
+---
+
+# .center[Simulate random choices]
+
+```{r}
+data <- cbc_choices(
+  design = design,
+  obsID  = "obsID"
+)
+```
+
+--
+
+```{r}
+head(data)
+```
+
+---
+
+# .center[Simulate choices according to a prior]
+
+.leftcol[
+
+```{r}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list( #<< 
+    price     = -0.1, #<< 
+    type      = c(0.1, 0.2), #<< 
+    freshness = c(0.1, -0.2) #<< 
+  ) #<< 
+)
+```
+
+]
+
+.rightcol[
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.2
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+
+]
+
+---
+
+# .center[Simulate choices according to a prior]
+
+.leftcol[
+
+```{r}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list(  
+    price = -0.1, 
+    type = randN(  #<<
+      mu    = c(0.1, 0.2), #<<
+      sigma = c(0.5, 1) #<< 
+    ), #<<
+    freshness = c(0.1, -0.2) 
+  ) 
+)
+```
+
+]
+
+.rightcol[
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | N(0.1, 0.5)
+          | Honeycrisp  | N(0.2, 1)
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+
+]
 
 ---
 
@@ -377,46 +678,52 @@ background-image: url("images/process_power.png")
 
 ---
 
-Full workflow example: apples
+# .center[Conduct a power analysis]
 
----
-
-Comparison examples
-
-Labeled vs. unlabeled
-
----
-
-Iteractions vs. no interactions
-
-# .center[Example: Wine Pairings]
-
-.leftcol40[
-
-meat | wine
------|------
-fish | white
-fish | red
-steak | white
-steak | red
-
-]
+```{r}
+power <- cbc_power(
+    nbreaks = 10,
+    n_q     = 3,
+    data    = data,
+    pars    = c("price", "type", "freshness"),
+    outcome = "choice",
+    obsID   = "obsID"
+)
+```
 
 --
 
-.rightcol60[
+.leftcol[
 
-## Main Effects
+```{r}
+head(power)
+```
 
-1. **Fish** or **Steak**?
-2. **Red** or **White** wine?
-
-## Interaction Effects
-
-1. **Red** or **White** wine _with **Steak**_?
-2. **Red** or **White** wine _with **Fish**_?
 ]
 
+.rightcol[
+
+```{r}
+tail(power)
+```
+
+]
+
+---
+
+# .center[Conduct a power analysis]
+
+```{r, fig.width=8, fig.height=5}
+plot(power)
+```
+
+---
+
+background-image: url("images/process_labels.png")
+
+<center>
+<img src="images/logo.png" width=20%>
+</center>
 
 ---
 

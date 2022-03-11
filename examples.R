@@ -240,13 +240,7 @@ ggsave(file.path("images", "design_compare_int.png"), width = 9, height = 4)
 
 
 
-
-
-
-
-
-
-
+# Apple conjoint example ----
 
 # Define the attributes and levels
 levels <- list(
@@ -327,7 +321,7 @@ data_prior <- cbc_choices(
   design = design_rand,
   obsID = "obsID",
   priors = list(
-    price     = 0.1,
+    price     = -0.1,
     type      = c(0.1, 0.2),
     freshness = c(0.1, -0.2)
   )
@@ -342,7 +336,7 @@ data_prior_int <- cbc_choices(
   design = design_rand,
   obsID = "obsID",
   priors = list(
-    price = 0.1,
+    price = -0.1,
     type = c(0.1, 0.2),
     freshness = c(0.1, -0.2),
     `price*type` = c(0.1, 0.5)
@@ -357,11 +351,27 @@ data_prior_mixed <- cbc_choices(
   design = design_rand,
   obsID = "obsID",
   priors = list(
-    price = 0.1,
+    price = -0.1,
     type = randN(mu = c(0.1, 0.2), sigma = c(0.5, 1)),
     freshness = c(0.1, -0.2)
   )
 )
 
+# Estimate models with different sample sizes
+results <- cbc_power(
+    nbreaks = 10,
+    n_q     = 6,
+    data    = data_rand,
+    pars    = c("price", "type", "freshness"),
+    outcome = "choice",
+    obsID   = "obsID"
+)
+
+# Preview
+head(results)
+tail(results)
+
+# Visualize
+plot(results)
 
 
