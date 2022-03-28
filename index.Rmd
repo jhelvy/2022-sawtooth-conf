@@ -232,9 +232,14 @@ brand & price:
 
 ---
 
-# .center[D-efficient designs]
+# .center[Bayesian D-efficient designs]
 
-### .center[Attempts to maximize information on "Main Effects"]
+### .center[Maximize information on "Main Effects" according to priors]
+
+Attribute | Levels | Prior
+----------|-------------------|----------
+Brand     | GW, BMW, Ferrari  | 0, 1, 2
+Price     | $20k, $40k, $100k | 0, -1, -4
 
 --
 
@@ -245,12 +250,12 @@ Attribute counts:
 
 brand:
   GM    BMW   Ferrari 
-  90    90     90 
+  93    90     86
 
 price:
 
   20k  40k 100k 
-  90   90  90
+  97   93   78
 ```
 
 ]
@@ -265,35 +270,33 @@ Pairwise attribute counts:
 brand & price:
          
           20k 40k 100k
-  GM      30  30  30
+  GM      52  41  0
   BMW     30  30  30
-  Ferrari 30  30  30
+  Ferrari 15  22  49
 ```
 
 ]
 
 ---
 
-# .center[D-efficient designs]
+# .center[Bayesian D-efficient designs]
 
 ### .center[Attempts to maximize information on .red[Main Effects]]
 
 --
 
 <center>
-<img src="images/design_compare.png" width=80%>
+<img src="images/design_compare.png" width=100%>
 </center>
 
 ---
-
-# .center[D-efficient designs]
 
 ### .center[...but .red[interaction effects] are confounded in D-efficient designs]
 
 --
 
 <center>
-<img src="images/design_compare_int.png" width=80%>
+<img src="images/design_compare_int.png" width=120%>
 </center>
 
 ---
@@ -310,7 +313,7 @@ brand & price:
 
 --
 
-- What if I use a labeled design?
+- What if I use a labeled design (aka "alternative-specific design")?
 
 --
 
@@ -403,6 +406,71 @@ tail(profiles)
 
 ---
 
+# .center[Attribute-specific levels]
+
+<br>
+
+```{r}
+levels <- list(
+  price = c(1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00),
+  freshness = c("Excellent", "Average", "Poor"),
+  type = list(
+    "Fuji" = list(
+        price = c(2.00, 2.50, 3.00)
+    ),
+    "Gala" = list(
+        price = c(1.00, 1.50, 2.00)
+    ),
+    "Honeycrisp" = list(
+        price = c(2.50, 3.00, 3.50, 4.00),
+        freshness = c("Excellent", "Average")
+    )
+  )
+)
+```
+
+---
+
+# .center[Generate restricted set of profiles]
+
+<br>
+
+```{r, include = FALSE}
+profiles_attspec <- cbc_profiles(levels)
+```
+
+```{r, eval=FALSE}
+profiles <- cbc_profiles(levels)
+```
+
+--
+
+.leftcol[
+
+```{r, eval=FALSE}
+head(profiles)
+```
+
+```{r, echo=FALSE}
+head(profiles_attspec)
+```
+
+]
+
+.rightcol[
+
+```{r, eval=FALSE}
+tail(profiles)
+```
+
+```{r, echo=FALSE}
+tail(profiles_attspec)
+```
+
+]
+
+---
+
 background-image: url("images/process_design.png")
 
 ---
@@ -448,6 +516,8 @@ head(design)
 
 # .center[Make a labeled design]
 
+### .center[(aka "Alternative-specific design)]
+
 ```{r}
 design <- cbc_design(
   profiles = profiles,
@@ -466,7 +536,9 @@ head(design)
 
 ---
 
-# .center[Make a D-efficient design (coming soon!)]
+# .center[Make a Bayesian D-efficient design]
+
+### .center[(coming soon!)]
 
 ```{r, eval=FALSE}
 design <- cbc_design(
@@ -474,11 +546,19 @@ design <- cbc_design(
   n_resp   = 300, # Number of respondents
   n_alts   = 3,   # Number of alternatives per question
   n_q      = 6,    # Number of questions per respondent
-  d_eff    = TRUE #<<
+  priors = list( #<< 
+    price     = -0.1, #<< 
+    type      = c(0.1, 0.2), #<< 
+    freshness = c(0.1, -0.2) #<< 
+  ) #<< 
 )
 ```
 
---
+---
+
+# .center[Make a Bayesian D-efficient design]
+
+### .center[(coming soon!)]
 
 <br>
 
@@ -486,7 +566,7 @@ design <- cbc_design(
 
 --
 
-## - Import a design: .darkblue[Sawtooth] `r fa("arrow-right")` `r fa("file-csv", fill = "darkgreen")` `r fa("arrow-right")` `r fa("r-project", fill = "darkblue")`
+## - Import a design: .blue[Sawtooth] `r fa("arrow-right", fill = "blue")` `r fa("file-csv", fill = "blue")` `r fa("arrow-right")` `r fa("r-project", fill = "blue")`
 
 ---
 
@@ -719,11 +799,54 @@ plot(power)
 
 ---
 
+# .center[Conduct a power analysis]
+
+.leftcol[
+
+```{r}
+power_int <- cbc_power(
+    nbreaks = 10,
+    n_q     = 3,
+    data    = data,
+    pars    = c(
+      "price", 
+      "type", 
+      "freshness", 
+      "price*freshness" #<<
+    ), 
+    outcome = "choice",
+    obsID   = "obsID"
+)
+```
+
+]
+
+.rightcol[
+
+```{r, fig.width=8, fig.height=5}
+plot(power_int)
+```
+
+]
+
+---
+
 background-image: url("images/process_labels.png")
 
 <center>
 <img src="images/logo.png" width=20%>
 </center>
+
+---
+
+background-image: url("images/sawtooth-cbcTools.png")
+
+---
+
+background-color: #fff
+background-image: url("images/cbcTools-sawtooth.png")
+background-position: center
+background-size: contain
 
 ---
 
