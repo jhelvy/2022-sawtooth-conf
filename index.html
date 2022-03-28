@@ -425,12 +425,12 @@ head(design)
 
 ```
 #&gt;   respID qID altID obsID profileID price       type freshness
-#&gt; 1      1   1     1     1        31   2.0       Gala   Average
-#&gt; 2      1   1     2     1        49   4.0       Fuji      Poor
-#&gt; 3      1   1     3     1        16   1.5 Honeycrisp Excellent
-#&gt; 4      1   2     1     2        31   2.0       Gala   Average
-#&gt; 5      1   2     2     2        49   4.0       Fuji      Poor
-#&gt; 6      1   2     3     2        56   4.0       Gala      Poor
+#&gt; 1      1   1     1     1         6   3.5       Fuji Excellent
+#&gt; 2      1   1     2     1        25   2.5       Fuji   Average
+#&gt; 3      1   1     3     1        45   2.0       Fuji      Poor
+#&gt; 4      1   2     1     2        18   2.5 Honeycrisp Excellent
+#&gt; 5      1   2     2     2        32   2.5       Gala   Average
+#&gt; 6      1   2     3     2         7   4.0       Fuji Excellent
 ```
 
 ---
@@ -457,12 +457,12 @@ head(design)
 
 ```
 #&gt;       respID qID altID obsID profileID price type_Fuji type_Gala type_Honeycrisp freshness_Excellent freshness_Average freshness_Poor no_choice
-#&gt; 1          1   1     1     1        34   3.5         0         1               0                   0                 1              0         0
-#&gt; 2          1   1     2     1        12   3.0         0         1               0                   1                 0              0         0
-#&gt; 3          1   1     3     1        54   3.0         0         1               0                   0                 0              1         0
+#&gt; 1          1   1     1     1        43   1.0         1         0               0                   0                 0              1         0
+#&gt; 2          1   1     2     1        47   3.0         1         0               0                   0                 0              1         0
+#&gt; 3          1   1     3     1        27   3.5         1         0               0                   0                 1              0         0
 #&gt; 11000      1   1     4     1         0   0.0         0         0               0                   0                 0              0         1
-#&gt; 4          1   2     1     2         3   2.0         1         0               0                   1                 0              0         0
-#&gt; 5          1   2     2     2        29   1.0         0         1               0                   0                 1              0         0
+#&gt; 4          1   2     1     2        40   3.0         0         0               1                   0                 1              0         0
+#&gt; 5          1   2     2     2        16   1.5         0         0               1                   1                 0              0         0
 ```
 
 ---
@@ -490,11 +490,11 @@ head(design)
 ```
 #&gt;   respID qID altID obsID profileID price       type freshness
 #&gt; 1      1   1     1     1        45   2.0       Fuji      Poor
-#&gt; 2      1   1     2     1        34   3.5       Gala   Average
+#&gt; 2      1   1     2     1        12   3.0       Gala Excellent
 #&gt; 3      1   1     3     1        62   3.5 Honeycrisp      Poor
-#&gt; 4      1   2     1     2        25   2.5       Fuji   Average
-#&gt; 5      1   2     2     2         8   1.0       Gala Excellent
-#&gt; 6      1   2     3     2        19   3.0 Honeycrisp Excellent
+#&gt; 4      1   2     1     2        49   4.0       Fuji      Poor
+#&gt; 5      1   2     2     2        12   3.0       Gala Excellent
+#&gt; 6      1   2     3     2        40   3.0 Honeycrisp   Average
 ```
 
 ---
@@ -642,11 +642,11 @@ head(data)
 ```
 #&gt;   respID qID altID obsID profileID price       type freshness choice
 #&gt; 1      1   1     1     1        45   2.0       Fuji      Poor      0
-#&gt; 2      1   1     2     1        34   3.5       Gala   Average      0
+#&gt; 2      1   1     2     1        12   3.0       Gala Excellent      0
 #&gt; 3      1   1     3     1        62   3.5 Honeycrisp      Poor      1
-#&gt; 4      1   2     1     2        25   2.5       Fuji   Average      0
-#&gt; 5      1   2     2     2         8   1.0       Gala Excellent      1
-#&gt; 6      1   2     3     2        19   3.0 Honeycrisp Excellent      0
+#&gt; 4      1   2     1     2        49   4.0       Fuji      Poor      1
+#&gt; 5      1   2     2     2        12   3.0       Gala Excellent      0
+#&gt; 6      1   2     3     2        40   3.0 Honeycrisp   Average      0
 ```
 
 ---
@@ -753,12 +753,12 @@ head(power)
 
 ```
 #&gt;   sampleSize             coef         est         se
-#&gt; 1         60            price  0.01039211 0.09235160
-#&gt; 2         60         typeGala  0.31948570 0.19014684
-#&gt; 3         60   typeHoneycrisp  0.32384030 0.19024677
-#&gt; 4         60 freshnessAverage  0.20887605 0.22615381
-#&gt; 5         60    freshnessPoor  0.14539300 0.22912079
-#&gt; 6        120            price -0.09227504 0.06479305
+#&gt; 1         60            price -0.15499765 0.10063774
+#&gt; 2         60         typeGala  0.30044995 0.19624483
+#&gt; 3         60   typeHoneycrisp  0.42378639 0.19039153
+#&gt; 4         60 freshnessAverage  0.09587031 0.22029371
+#&gt; 5         60    freshnessPoor -0.26040359 0.23307860
+#&gt; 6        120            price -0.09724367 0.06884621
 ```
 
 ]
@@ -772,12 +772,12 @@ tail(power)
 
 ```
 #&gt;    sampleSize             coef          est         se
-#&gt; 45        540    freshnessPoor -0.117739581 0.07640364
-#&gt; 46        600            price -0.082295267 0.02943793
-#&gt; 47        600         typeGala -0.006132216 0.06001353
-#&gt; 48        600   typeHoneycrisp  0.196808713 0.05717587
-#&gt; 49        600 freshnessAverage  0.176885464 0.07073506
-#&gt; 50        600    freshnessPoor -0.103647175 0.07261020
+#&gt; 45        540    freshnessPoor -0.210802825 0.07564825
+#&gt; 46        600            price -0.092167008 0.02935447
+#&gt; 47        600         typeGala  0.172050443 0.06068744
+#&gt; 48        600   typeHoneycrisp  0.329655769 0.05866559
+#&gt; 49        600 freshnessAverage  0.004712594 0.07076636
+#&gt; 50        600    freshnessPoor -0.216824385 0.07205805
 ```
 
 ]
