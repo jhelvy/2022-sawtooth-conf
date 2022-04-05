@@ -514,9 +514,9 @@ head(design)
 
 ---
 
-# .center[Make a labeled design]
+## .center[Make a labeled design]
 
-### .center[(aka "Alternative-specific design)]
+.center[.font100[(aka "alternative-specific design")]]
 
 ```{r}
 design <- cbc_design(
@@ -545,7 +545,7 @@ design <- cbc_design(
   profiles = profiles,
   n_resp   = 300, # Number of respondents
   n_alts   = 3,   # Number of alternatives per question
-  n_q      = 6,    # Number of questions per respondent
+  n_q      = 6,   # Number of questions per respondent
   priors = list( #<< 
     price     = -0.1, #<< 
     type      = c(0.1, 0.2), #<< 
@@ -566,7 +566,7 @@ design <- cbc_design(
 
 --
 
-## - Import a design: .blue[Sawtooth] `r fa("arrow-right", fill = "blue")` `r fa("file-csv", fill = "blue")` `r fa("arrow-right")` `r fa("r-project", fill = "blue")`
+## - Import a design: .blue[Sawtooth] `r fa("arrow-right", fill = "blue")` `r fa("file-csv", fill = "blue")` `r fa("arrow-right", fill = "blue")` `r fa("r-project", fill = "blue")`
 
 ---
 
@@ -721,7 +721,7 @@ Attribute | Level | Utility
 
 .leftcol[
 
-```{r}
+```{r, eval=FALSE}
 data <- cbc_choices(
   design = design,
   obsID = "obsID",
@@ -754,6 +754,44 @@ Attribute | Level | Utility
 
 ---
 
+# .center[Simulate choices according to a prior]
+
+.leftcol[
+
+```{r, eval=FALSE}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list( 
+    price     = -0.1, 
+    type      = c(0.1, 0.2), 
+    freshness = c(0.1, -0.2),
+    "price*type" = c(0.1, 0.5) #<<
+  ) 
+)
+```
+
+]
+
+.rightcol[
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.2
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+**Price x Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.5
+
+]
+
+---
+
 background-image: url("images/process_power.png")
 
 ---
@@ -763,11 +801,11 @@ background-image: url("images/process_power.png")
 ```{r}
 power <- cbc_power(
     nbreaks = 10,
-    n_q     = 3,
+    n_q     = 6,
     data    = data,
-    pars    = c("price", "type", "freshness"),
+    obsID   = "obsID",
     outcome = "choice",
-    obsID   = "obsID"
+    pars    = c("price", "type", "freshness")
 )
 ```
 
@@ -806,13 +844,13 @@ plot(power)
 ```{r}
 power_int <- cbc_power(
     nbreaks = 10,
-    n_q     = 3,
+    n_q     = 6,
     data    = data,
     pars    = c(
       "price", 
       "type", 
       "freshness", 
-      "price*freshness" #<<
+      "price*type" #<<
     ), 
     outcome = "choice",
     obsID   = "obsID"
