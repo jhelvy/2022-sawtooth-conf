@@ -142,7 +142,7 @@ class: center
 
 Attribute | Levels
 ----------|----------
-Brand     | GW, BMW, Ferrari 
+Brand     | GM, BMW, Ferrari
 Price     | $20k, $40k, $100k
 
 .center[**Design: .red[9] choice sets, .blue[3] alternatives each**]
@@ -189,7 +189,7 @@ brand & price:
 
 Attribute | Levels
 ----------|----------
-Brand     | GW, BMW, Ferrari 
+Brand     | GM, BMW, Ferrari
 Price     | $20k, $40k, $100k
 
 .center[**Design: .red[90] choice sets, .blue[3] alternatives each**]
@@ -238,7 +238,7 @@ brand & price:
 
 Attribute | Levels | Prior
 ----------|-------------------|----------
-Brand     | GW, BMW, Ferrari  | 0, 1, 2
+Brand     | GM, BMW, Ferrari  | 0, 1, 2
 Price     | $20k, $40k, $100k | 0, -1, -4
 
 --
