@@ -1,0 +1,17 @@
+---
+title: "The cbcTools Package: Tools for Designing and Testing Choice-Based Conjoint Surveys in R"
+author:
+- John Paul Helveston, Ph.D.^[Engineering Management and Systems Engineering, George
+  Washington University, Washington, D.C. USA]
+abstract: |
+  This is the abstract.
+  It consists of two lines.
+output: word_document
+bibliography: library.bib
+fontsize: 12pt
+---
+
+Main body text goes here
+
+
+# References {-}
