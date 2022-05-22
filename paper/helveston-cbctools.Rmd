@@ -4,14 +4,570 @@ author:
 - John Paul Helveston, Ph.D.^[Engineering Management and Systems Engineering, George
   Washington University, Washington, D.C. USA]
 abstract: |
-  This is the abstract.
-  It consists of two lines.
+  Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
 output: word_document
 bibliography: library.bib
 fontsize: 12pt
 ---
 
-Main body text goes here
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  fig.path = "figs/",
+  fig.width = 7.252,
+  fig.height = 4,
+  comment = "#>",
+  fig.retina = 3
+)
+
+library(cbcTools)
+```
+
+
+Designing a "good" choice-based conjoint survey is almost never a simple, straightforward process. 
+
+
+
+
+"images/tradeoffs2.png"
+
+
+
+
+
+
+# .center[A simple conjoint experiment about _cars_]
+
+Attribute | Levels
+----------|----------
+Brand     | GM, BMW, Ferrari
+Price     | $20k, $40k, $100k
+
+.center[**Design: .red[9] choice sets, .blue[3] alternatives each**]
+
+
+```
+Attribute counts:
+
+brand:
+  GM   BMW  Ferrari 
+  10    11    6 
+
+price:
+
+ 20k  40k 100k 
+  9    9   9
+```
+
+
+
+```
+Pairwise attribute counts:
+
+brand & price:
+         
+          20k 40k 100k
+  GM        3   0    7
+  BMW       4   5    2
+  Ferrari   2   4    0
+```
+
+
+
+# .center[A simple conjoint experiment about _cars_]
+
+Attribute | Levels
+----------|----------
+Brand     | GM, BMW, Ferrari
+Price     | $20k, $40k, $100k
+
+.center[**Design: .red[90] choice sets, .blue[3] alternatives each**]
+
+
+
+```
+Attribute counts:
+
+brand:
+  GM    BMW   Ferrari 
+  92    80     98
+
+price:
+
+  20k  40k 100k 
+  91   84   95 
+```
+
+
+```
+Pairwise attribute counts:
+
+brand & price:
+         
+          20k 40k 100k
+  GM      31  31  30
+  BMW     25  25  30
+  Ferrari 35  28  35
+```
+
+# .center[Bayesian D-efficient designs]
+
+### .center[Maximize information on "Main Effects" according to priors]
+
+Attribute | Levels | Prior
+----------|-------------------|----------
+Brand     | GM, BMW, Ferrari  | 0, 1, 2
+Price     | $20k, $40k, $100k | 0, -1, -4
+
+
+
+```
+Attribute counts:
+
+brand:
+  GM    BMW   Ferrari 
+  93    90     86
+
+price:
+
+  20k  40k 100k 
+  97   93   78
+```
+
+
+```
+Pairwise attribute counts:
+
+brand & price:
+         
+          20k 40k 100k
+  GM      52  41  0
+  BMW     30  30  30
+  Ferrari 15  22  49
+```
+
+
+# .center[Bayesian D-efficient designs]
+
+### .center[Attempts to maximize information on .red[Main Effects]]
+
+"images/design_compare.png" 
+
+
+### .center[...but .red[interaction effects] are confounded in D-efficient designs]
+
+"images/design_compare_int.png"
+
+# .center[But what about other factors?]
+
+- What if I add one more choice question to each respondent?
+- What if I increase the number of alternatives per choice question?
+- What if I use a labeled design (aka "alternative-specific design")?
+- What if there are interaction effects?
+
+
+
+
+```{r, echo=FALSE, fig.align='center', fig.cap="Figure 1 Caption", out.width="100%"}
+knitr::include_graphics("figs/process.png")
+```
+
+
+# .center[Define the attributes and levels]
+
+
+```{r}
+levels <- list(
+  price     = c(1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00), # $ per pound
+  type      = c("Fuji", "Gala", "Honeycrisp"),
+  freshness = c("Excellent", "Average", "Poor")
+)
+```
+
+
+```{r}
+levels
+```
+
+
+# .center[Generate all possible profiles]
+
+
+```{r}
+profiles <- cbc_profiles(levels)
+```
+
+```{r}
+head(profiles)
+```
+
+```{r}
+tail(profiles)
+```
+
+
+# .center[Attribute-specific levels]
+
+
+```{r}
+levels <- list(
+  price = c(1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00),
+  freshness = c("Excellent", "Average", "Poor"),
+  type = list(
+    "Fuji" = list(
+        price = c(2.00, 2.50, 3.00)
+    ),
+    "Gala" = list(
+        price = c(1.00, 1.50, 2.00)
+    ),
+    "Honeycrisp" = list(
+        price = c(2.50, 3.00, 3.50, 4.00),
+        freshness = c("Excellent", "Average")
+    )
+  )
+)
+```
+
+
+# .center[Generate restricted set of profiles]
+
+
+```{r, include = FALSE}
+profiles_attspec <- cbc_profiles(levels)
+```
+
+```{r, eval=FALSE}
+profiles <- cbc_profiles(levels)
+```
+
+
+```{r, eval=FALSE}
+head(profiles)
+```
+
+```{r, echo=FALSE}
+head(profiles_attspec)
+```
+
+
+```{r, eval=FALSE}
+tail(profiles)
+```
+
+```{r, echo=FALSE}
+tail(profiles_attspec)
+```
+
+
+# .center[Generate a survey design]
+
+```{r}
+design <- cbc_design( 
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6    # Number of questions per respondent
+)
+```
+
+
+```{r}
+head(design)
+```
+
+
+# .center[Include a "no choice" option]
+
+```{r}
+design <- cbc_design(
+  profiles  = profiles,
+  n_resp    = 300, # Number of respondents
+  n_alts    = 3,   # Number of alternatives per question
+  n_q       = 6,    # Number of questions per respondent
+  no_choice = TRUE #<<
+)
+```
+
+```{r}
+head(design)
+```
+
+## .center[Make a labeled design]
+
+.center[.font100[(aka "alternative-specific design")]]
+
+```{r}
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6,    # Number of questions per respondent
+  label    = "type" #<<
+)
+```
+
+```{r}
+head(design)
+```
+
+# .center[Make a Bayesian D-efficient design]
+
+### .center[(coming soon!)]
+
+```{r, eval=FALSE}
+design <- cbc_design(
+  profiles = profiles,
+  n_resp   = 300, # Number of respondents
+  n_alts   = 3,   # Number of alternatives per question
+  n_q      = 6,   # Number of questions per respondent
+  priors = list( #<< 
+    price     = -0.1, #<< 
+    type      = c(0.1, 0.2), #<< 
+    freshness = c(0.1, -0.2) #<< 
+  ) #<< 
+)
+```
+
+# .center[Make a Bayesian D-efficient design]
+
+### .center[(coming soon!)]
+
+## - Check out the [`idefix`](https://www.jstatsoft.org/article/view/v096i03) package
+
+## - Import a design: .blue[Sawtooth] 
+
+
+# .center[Check design **balance**]
+
+```{r, eval=FALSE}
+cbc_balance(design)
+```
+
+```
+Attribute counts:
+
+price:
+
+      1 1.5   2 2.5   3 3.5   4 
+    825 797 743 743 767 779 746 
+
+type:
+
+    Fuji       Gala Honeycrisp 
+    1842       1769       1789 
+
+freshness:
+  
+    Excellent   Average      Poor 
+         1813      1775      1812 
+```
+
+
+```
+Pairwise attribute counts:
+
+price & type:
+     
+      Fuji Gala Honeycrisp
+  1    304  252        269
+  1.5  274  251        272
+  2    257  254        232
+  2.5  240  254        249
+  3    249  263        255
+  3.5  257  250        272
+  4    261  245        240
+```
+
+
+# .center[Check design **overlap**]
+
+```{r, eval=FALSE}
+cbc_overlap(design)
+```
+
+
+```
+Counts of attribute overlap:
+(# of questions with N unique levels)
+
+price:
+
+     1    2    3 
+    31  630 1139 
+
+type:
+
+     1    2    3 
+   156 1248  396 
+
+freshness:
+
+     1    2    3 
+   175 1189  436 
+```
+
+
+# .center[Simulate random choices]
+
+```{r}
+data <- cbc_choices(
+  design = design,
+  obsID  = "obsID"
+)
+```
+
+```{r}
+head(data)
+```
+
+
+# .center[Simulate choices according to a prior]
+
+
+```{r}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list( #<< 
+    price     = -0.1, #<< 
+    type      = c(0.1, 0.2), #<< 
+    freshness = c(0.1, -0.2) #<< 
+  ) #<< 
+)
+```
+
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.2
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+
+]
+
+
+# .center[Simulate choices according to a prior]
+
+
+```{r, eval=FALSE}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list(  
+    price = -0.1, 
+    type = randN(  #<<
+      mu    = c(0.1, 0.2), #<<
+      sigma = c(0.5, 1) #<< 
+    ), #<<
+    freshness = c(0.1, -0.2) 
+  ) 
+)
+```
+
+
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | N(0.1, 0.5)
+          | Honeycrisp  | N(0.2, 1)
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+
+]
+
+
+# .center[Simulate choices according to a prior]
+
+
+```{r, eval=FALSE}
+data <- cbc_choices(
+  design = design,
+  obsID = "obsID",
+  priors = list( 
+    price     = -0.1, 
+    type      = c(0.1, 0.2), 
+    freshness = c(0.1, -0.2),
+    "price*type" = c(0.1, 0.5) #<<
+  ) 
+)
+```
+
+
+Attribute | Level | Utility 
+----------|-----------
+**Price** | Continuous | -0.1
+**Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.2
+**Freshness**  | Average | 0
+               | Excellent | 0.1
+               | Poor  | -0.2
+**Price x Type**  | Fuji | 0
+          | Gala | 0.1
+          | Honeycrisp  | 0.5
+
+]
+
+# Power analyses
+
+
+```{r}
+power <- cbc_power(
+    nbreaks = 10,
+    n_q     = 6,
+    data    = data,
+    obsID   = "obsID",
+    outcome = "choice",
+    pars    = c("price", "type", "freshness")
+)
+```
+
+```{r}
+head(power)
+```
+
+
+
+```{r}
+tail(power)
+```
+
+
+```{r, fig.width=8, fig.height=5}
+plot(power)
+```
+
+
+```{r}
+power_int <- cbc_power(
+    nbreaks = 10,
+    n_q     = 6,
+    data    = data,
+    pars    = c(
+      "price", 
+      "type", 
+      "freshness", 
+      "price*type" #<<
+    ), 
+    outcome = "choice",
+    obsID   = "obsID"
+)
+```
+
+```{r, fig.width=8, fig.height=5}
+plot(power_int)
+```
+
+
+`cbcTools` documentation: https://jhelvy.github.io/cbcTools/
 
 # References {-}
