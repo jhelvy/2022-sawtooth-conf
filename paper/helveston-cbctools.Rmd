@@ -5,7 +5,7 @@ author:
   Washington University, Washington, D.C. USA]
 abstract: |
   Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
-output: word_document
+output: pdf_document
 bibliography: library.bib
 fontsize: 12pt
 ---
@@ -25,13 +25,19 @@ knitr::opts_chunk$set(
 library(cbcTools)
 ```
 
+Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider a wide variety of trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is highly iterative, yet there are few tools for quickly comparing the outcomes of different designs. 
 
-Designing a "good" choice-based conjoint survey is almost never a simple, straightforward process. 
+This paper introduces the `cbcTools` package, which provides a set of tools for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R.
+
+Often times the Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
+
+ 
+
+```{r, echo=FALSE, fig.align='center', fig.cap="Caption", out.width="75%"}
+knitr::include_graphics("figs/tradeoffs.png")
+```
 
 
-
-
-"images/tradeoffs2.png"
 
 
 
@@ -170,7 +176,7 @@ brand & price:
 
 
 
-```{r, echo=FALSE, fig.align='center', fig.cap="Figure 1 Caption", out.width="100%"}
+```{r, echo=FALSE, fig.align='center', fig.cap="Caption", out.width="100%"}
 knitr::include_graphics("figs/process.png")
 ```
 
