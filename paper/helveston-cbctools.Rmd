@@ -34,8 +34,8 @@ Designing a choice-based conjoint survey is almost never a simple, straightforwa
 
 As a quick example, consider a simple conjoint experiment about cars with just two attributes with three levels each: 
 
-- Price:  $20,000, 40,000, & 100,000
-- Brand: GM, BMW, & Ferrari
+- **Price**:  $20,000, 40,000, & 100,000
+- **Brand**: GM, BMW, & Ferrari
 
 A simple starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
 
@@ -110,7 +110,11 @@ kbl(
 
 Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs. Thus, if interaction effects are expected, a randomized design may be a more appropriate choice.
 
-```{r, echo=FALSE, fig.align='center', fig.cap="Standard errors with increasing sample size for a multinomial logit model with interaction effects estimated using a randomized design versus a Bayesian D-efficient design", out.width="100%"}
+```{r}
+#| echo: FALSE
+#| fig.align: 'center'
+#| out.width: "100%"
+#| fig.cap: "Standard errors with increasing sample size for a multinomial logit model with interaction effects estimated using a randomized design versus a Bayesian D-efficient design"
 knitr::include_graphics("figs/design_compare.png")
 ```
 
@@ -120,7 +124,11 @@ As the previous example illustrates, designing a choice-based conjoint experimen
 
 The package provides a set of functions (each starting with `cbc_`) for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. The typical workflow involves a series of steps, and each step has a function associated with it (see Figure 2).
 
-```{r, echo=FALSE, fig.align='center', fig.cap="Diagram of the choice-based conjoint survey design process", out.width="100%"}
+```{r}
+#| echo: FALSE
+#| fig.align: 'center'
+#| out.width: "100%"
+#| fig.cap: "Diagram of the choice-based conjoint survey design process."
 knitr::include_graphics("figs/program_diagram.png")
 ```
 
@@ -224,7 +232,7 @@ In the above example, the `type` attribute is now fixed to be the same order for
 
 ### Adding a "no choice" option (a.k.a. "outside good")
 
-You can include a "no choice" (also known as "outside good") option in the survey by setting `no_choice = TRUE`. If included, all categorical attributes will be dummy-coded to appropriately dummy-code the "no choice" alternative.
+Often times designers may wish to allow respondents to opt out from choosing any of the alternatives shown in any one choice question. Such a "no choice" (or "outside good") option can be included by setting `no_choice = TRUE`. If included, all categorical attributes will be dummy-coded to appropriately dummy-code the "no choice" alternative.
 
 ```{r}
 design_nochoice <- cbc_design(
@@ -321,7 +329,9 @@ data <- cbc_choices(
 
 ## Analyzing power
 
-The simulated choice data can be used to conduct a power analysis by estimating the same model multiple times with incrementally increasing sample sizes. As the sample size increases, the estimated coefficient standard errors will decrease (i.e. coefficient estimates become more precise). The `cbc_power()` function achieves this by partitioning the choice data into multiple sizes (defined by the `nbreaks` argument) and then estimating a user-defined choice model on each data subset. In the example below, 10 different sample sizes are used. All models are estimated using the [{logitr}](https://jhelvy.github.io/logitr) package:
+The simulated choice data can be used to conduct a power analysis by estimating the same model multiple times with incrementally increasing sample sizes. As the sample size increases, the estimated coefficient standard errors will decrease (i.e. coefficient estimates become more precise), allowing the designer to identify the sample size required to achieve a desired level of precision. 
+
+The `cbc_power()` function achieves this by partitioning the choice data into multiple sizes (defined by the `nbreaks` argument) and then estimating a user-defined choice model on each data subset. In the example below, 10 different sample sizes are used. All models are estimated using the [`logitr`](https://jhelvy.github.io/logitr) package, and any arguments for estimating models with the `logitr` package can be passed through the `cbc_power()` function.
 
 ```{r}
 power <- cbc_power(
@@ -337,13 +347,16 @@ head(power)
 tail(power)
 ```
 
-The `power` data frame contains the coefficient estimates and standard errors for each sample size. You can quickly visualize the outcome to identify a required sample size for a desired level of parameter precision by using the `plot()` method:
+The `power` data frame contains the coefficient estimates and standard errors for each sample size. The standard errors can be quickly visualized to identify a required sample size for a desired level of parameter precision by using the `plot()` method:
 
 ```{r power}
+#| out.width: "80%"
+#| fig.align: 'center'
+#| fig.cap: "Standard errors of each model coefficient with increasing sample size."
 plot(power)
 ```
 
-If you want to examine any other aspects of the models other than the standard errors, you can set `return_models = TRUE` and `cbc_power()` will return a list of estimated models. The example below prints a summary of the last model in the list of models:
+Of course, designers may be interested in aspects other than standard errors. By setting `return_models = TRUE`, the `cbc_power()` function will return a list of estimated models (one for each sample size increment), which can then be used to examine other model objects. The example below prints a summary of the last model in the list of returned models.
 
 ```{r}
 library(logitr)
@@ -363,7 +376,7 @@ summary(models[[10]])
 
 ## Piping it all together!
 
-One of the convenient features of how the package is written is that the object generated in each step is used as the first argument to the function for the next step. Thus, just like in the overall program diagram, the functions can be piped together:
+One of the convenient features of how the package is written is that the object generated in each step is used as the first argument to the function for the next step. Thus, just like in the overall program diagram (see Figure 2), the functions can be piped together. The example below will generate the same power analysis plot as in Figure 3 by sequentially evaluating each of the main design steps. 
 
 ```{r, eval=FALSE}
 cbc_profiles(
@@ -394,23 +407,16 @@ cbc_power(
 plot()
 ```
 
-```{r, ref.label='power', echo=FALSE}
-```
+One benefit of this piped structure is that it enables the designer to quickly observe the implications of different design choices on statistical power. For example, consider the following "what if" design questions:
 
-## Author, Version, and License Information
+- What if one more choice question was added to each respondent?
+- What if the number of alternatives per choice question was decreased to two?
+- What if a labeled design were used for the `type` attribute?
+- What if there was an interaction effect between `price` and `type`?
 
-- Author: *John Paul Helveston* https://www.jhelvy.com/
-- Date First Written: *October 23, 2020*
-- License: [MIT](https://github.com/jhelvy/cbcTools/blob/master/LICENSE.md)
+Obtaining an answer to each of these questions requires only small modifications to the arguments in one or more functions inside the analysis "pipeline". Once the change is made, the entire analysis can be quickly re-executed and the results compared to those of an alternative design. Because `cbcTools` leverages the `logitr` package (which is highly optimized for speed) for simulating choices and estimating models, re-executing each analysis should be relatively fast, taking only seconds to compute the entire process on most modern computers and laptops.
 
-## Citation Information
-
-If you use this package for in a publication, I would greatly appreciate it if you cited it - you can get the citation by typing `citation("cbcTools")` into R:
-
-```{r}
-citation("cbcTools")
-```
-
+# Conclusions
 
 
 # References {-}
