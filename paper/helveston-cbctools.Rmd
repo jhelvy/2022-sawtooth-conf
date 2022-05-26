@@ -23,36 +23,33 @@ knitr::opts_chunk$set(
 )
 
 library(cbcTools)
+library(kableExtra)
 ```
 
-Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider a wide variety of trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is highly iterative, yet there are few tools for quickly comparing the outcomes of different designs. 
+Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider multiple trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is typically highly iterative.
 
-This paper introduces the `cbcTools` package, which provides a set of tools for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R.
+As a quick example, consider a simple conjoint experiment about cars with just two attributes ("Price" and "Brand") with the levels in the table below:
 
-Often times the Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
-
- 
-
-```{r, echo=FALSE, fig.align='center', fig.cap="Caption", out.width="75%"}
-knitr::include_graphics("figs/tradeoffs.png")
+```{r, echo=FALSE}
+kbl(
+    data.frame(
+        Attribute = c("Brand", "Price"), 
+        Levels = c("GM, BMW, Ferrari", "$20,000, $40,000, $100,000") 
+    ),
+    booktabs = TRUE, caption = "Example conjoint attributes and levels."
+)
 ```
 
+A simple starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
 
-
-
-
-
-
-
-# .center[A simple conjoint experiment about _cars_]
-
-Attribute | Levels
-----------|----------
-Brand     | GM, BMW, Ferrari
-Price     | $20k, $40k, $100k
-
-.center[**Design: .red[9] choice sets, .blue[3] alternatives each**]
-
+```{r, echo=FALSE}
+kbl(
+    data.frame(
+        a = c()
+    ),
+    booktabs = TRUE, caption = "Example conjoint attributes and levels."
+)
+```
 
 ```
 Attribute counts:
@@ -73,11 +70,14 @@ price:
 Pairwise attribute counts:
 
 brand & price:
-         
-          20k 40k 100k
-  GM        3   0    7
-  BMW       4   5    2
-  Ferrari   2   4    0
+
+                   Price
+                 | 20k 40k 100k
+                 |  9   9    9
+    Brand        |--------------
+    GM        10 |  3   0    7
+    BMW       11 |  4   5    2
+    Ferrari    6 |  2   4    0
 ```
 
 
@@ -174,6 +174,11 @@ brand & price:
 - What if there are interaction effects?
 
 
+This paper introduces a package designed for this purpose.
+
+The `cbcTools` package provides a set of tools for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. The package is designed as a series of functions (each starting with `cbc_`) that are designed to work in sequence through the  
+
+Often times the Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
 
 
 ## Make survey designs
