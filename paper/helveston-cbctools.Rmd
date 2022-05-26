@@ -24,63 +24,53 @@ knitr::opts_chunk$set(
 
 library(cbcTools)
 library(kableExtra)
+library(dplyr)
+library(gt)
 ```
+
+# Introduction 
 
 Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider multiple trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is typically highly iterative.
 
-As a quick example, consider a simple conjoint experiment about cars with just two attributes ("Price" and "Brand") with the levels in the table below:
+As a quick example, consider a simple conjoint experiment about cars with just two attributes with three levels each: 
 
-```{r, echo=FALSE}
-kbl(
-    data.frame(
-        Attribute = c("Brand", "Price"), 
-        Levels = c("GM, BMW, Ferrari", "$20,000, $40,000, $100,000") 
-    ),
-    booktabs = TRUE, caption = "Example conjoint attributes and levels."
-)
-```
+- Price:  $20,000, 40,000, & 100,000
+- Brand: GM, BMW, & Ferrari
 
 A simple starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
 
 ```{r, echo=FALSE}
 kbl(
-    data.frame(
-        a = c()
-    ),
-    booktabs = TRUE, caption = "Example conjoint attributes and levels."
-)
+  tibble(
+    "Price:" = c("Brand", "GM", "BMW", "Ferrari"),
+    "   " = c(" ", 10, 11, 6),
+    "$20,000" = c(9, 3, 4, 2), 
+    "$40,000" = c(9, 0, 5, 4), 
+    "$100,000" = c(9, 7, 2, 0)
+  ),
+  booktabs = TRUE, 
+  caption = "Individual and pairwise counts of attributes."
+) %>% 
+  kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-```
-Pairwise attribute counts:
-
-brand & price:
-
-                   Price
-                 | 20k 40k 100k
-                 |  9   9    9
-    Brand        |--------------
-    GM        10 |  3   0    7
-    BMW       11 |  4   5    2
-    Ferrari    6 |  2   4    0
-```
-
-Based on the counts alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GW and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. But the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
+Based on the counts alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GW and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. And the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
 
 This rather poor design is a common outcome when using a randomized design with a small number of choice sets. Simply increasing the number of choice sets often results in a much better balance. For example, if we increase the number from 9 to 90, we obtain the following counts:
 
-```
-Pairwise attribute counts:
-
-brand & price:
-
-                   Price
-                 | 20k 40k 100k
-                 |  91  84   95
-    Brand        |--------------
-    GM        92 |  31  31   30
-    BMW       80 |  25  25   30
-    Ferrari   98 |  35  28   35
+```{r, echo=FALSE}
+kbl(
+  tibble(
+    "Price:" = c("Brand", "GM", "BMW", "Ferrari"),
+    "   " = c(" ", 92, 80, 98),
+    "$20,000" = c(91, 31, 25, 35), 
+    "$40,000" = c(84, 31, 25, 30), 
+    "$100,000" = c(95, 30, 30, 35)
+  ),
+  booktabs = TRUE, 
+  caption = "Individual and pairwise counts of attributes."
+) %>% 
+  kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
 This design has a much better balance across the attribute levels than the one created from just 9 choice sets. However, it too has issues. Consider, for example, that about 1/3 of the time the Ferrari brand is shown it has a price of just $20,000. This is obviously an unrealistic profile, and if a user saw such a profile multiple times they may not take the choice exercise seriously.
@@ -90,68 +80,55 @@ One approach to try to correct this outcome is to use a Bayesian D-efficient des
 
 ```{r, echo=FALSE}
 kbl(
-    data.frame(
-        Attribute = c("**Price**", "", "", "**Brand**", "", ""),
+    tibble(
+        Attribute = c("Price", "", "", "Brand", "", ""),
         Level = c("$20,000", "$40,000", "$100,000", "GM", "BMW", "Ferrari"),
-        `Prior (utility)` = c(0, -1, -4, 0, 1, 2)
+        `Prior` = c(0, -1, -4, 0, 1, 2)
     ),
     booktabs = TRUE,
     caption = "Example conjoint attributes and levels."
-)
+) %>% 
+    kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-Using a Bayesian D-efficient design with 90 choice sets and the prior utilities in the table above, the counts become much more reasonable (see Table ##). Now the individual attribute counts are relatively balanced, and the pairwise combinations of attributes are much more plausible. For example, the GM brand is only shown at price levels of $20,000 and $40,000, and about half of the time Ferrari is shown at the $100,000 price level.
+Using a Bayesian D-efficient design with 90 choice sets and the prior utilities in Table 3, the counts become much more reasonable (see Table 4). Now the individual attribute counts are relatively balanced, and the pairwise combinations of attributes are much more plausible. For example, the GM brand is only shown at price levels of $20,000 and $40,000, and about half of the time Ferrari is shown at the $100,000 price level.
 
+```{r, echo=FALSE}
+kbl(
+  tibble(
+    "Price:" = c("Brand", "GM", "BMW", "Ferrari"),
+    "   " = c(" ", 93, 90, 86),
+    "$20,000" = c(97, 52, 30, 15), 
+    "$40,000" = c(93, 41, 30, 22), 
+    "$100,000" = c(78, 0, 30, 49)
+  ),
+  booktabs = TRUE, 
+  caption = "Individual and pairwise counts of attributes."
+) %>% 
+  kable_styling(latex_options = c("striped", "hold_position"))
 ```
-Pairwise attribute counts:
 
-brand & price:
+Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs. Thus, if interaction effects are expected, a randomized design may be a more appropriate choice.
 
-                   Price
-                 | 20k 40k 100k
-                 |  97  93   78
-    Brand        |--------------
-    GM        93 |  52  41   0
-    BMW       90 |  30  30   30
-    Ferrari   86 |  15  22   49
+```{r, echo=FALSE, fig.align='center', fig.cap="Standard errors with increasing sample size for a multinomial logit model with interaction effects estimated using a randomized design versus a Bayesian D-efficient design", out.width="100%"}
+knitr::include_graphics("figs/design_compare.png")
 ```
 
-Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure ## highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs.
+# The `cbcTools` Package
 
+As the previous example illustrates, designing a choice-based conjoint experiment is an iterative process, and designers must consider a wide range of factors. The `cbcTools` package was designed as a tool for helping designers navigate this process and to understand the impacts different design decisions could have on the statistical power of the experiment prior to fielding the survey. 
 
+The package provides a set of functions (each starting with `cbc_`) for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. The typical workflow involves a series of steps, and each step has a function associated with it (see Figure 2).
 
+```{r, echo=FALSE, fig.align='center', fig.cap="Diagram of the choice-based conjoint survey design process", out.width="100%"}
+knitr::include_graphics("figs/program_diagram.png")
+```
 
-# .center[Bayesian D-efficient designs]
+The rest of this paper explains each of these steps using a detailed example of a simple conjoint experiment about apples.
 
-### .center[Attempts to maximize information on .red[Main Effects]]
+## Generating profiles
 
-"images/design_compare.png" 
-
-
-### .center[...but .red[interaction effects] are confounded in D-efficient designs]
-
-"images/design_compare_int.png"
-
-# .center[But what about other factors?]
-
-- What if I add one more choice question to each respondent?
-- What if I increase the number of alternatives per choice question?
-- What if I use a labeled design (aka "alternative-specific design")?
-- What if there are interaction effects?
-
-
-This paper introduces a package designed for this purpose.
-
-The `cbcTools` package provides a set of tools for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. The package is designed as a series of functions (each starting with `cbc_`) that are designed to work in sequence through the  
-
-Often times the Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
-
-
-## Make survey designs
-
-### Generating profiles
-
-The first step in designing an experiment is to define the attributes and levels for your experiment and then generate all of the `profiles` of each possible combination of those attributes and levels. For example, let's say you're designing a conjoint experiment about apples and you want to include `price`, `type`, and `freshness` as attributes. You can obtain all of the possible profiles for these attributes using the `cbc_profiles()` function:
+The first step in designing an experiment is to define the attributes and levels for the experiment and then generate all of the `profiles` of each possible combination of those attributes and levels. For example, consider designing a conjoint experiment about apples with the following three attributes: `price`, `type`, and `freshness`. All of the possible profiles for these attributes can be obtained using the `cbc_profiles()` function:
 
 ```{r}
 profiles <- cbc_profiles(
@@ -165,9 +142,7 @@ head(profiles)
 tail(profiles)
 ```
 
-Depending on the context of your survey, you may wish to eliminate or modify some profiles before designing your conjoint survey (e.g., some profile combinations may be illogical or unrealistic). **WARNING: including hard constraints in your designs can substantially reduce the statistical power of your design, so use them cautiously and avoid them if possible**.
-
-If you do wish to set some levels conditional on those of other attributes, you can do so by setting each level of an attribute to a list that defines these constraints. In the example below, the `type` attribute has constraints such that only certain price levels will be shown for each level. In addition, for the `"Honeycrisp"` level, only two of the three `freshness` levels are included: `"Excellent"` and `"Average"`. Note that both the other attributes (`price` and `freshness`) should contain all of the possible levels. When these constraints you can see that there are only 30 profiles compared to 63 without constraints:
+Depending on the context of the survey, some profiles may need to be eliminated (e.g., some profile combinations may be illogical or unrealistic).^[Note that including hard constraints in your designs can substantially reduce the statistical power of your design, so use them cautiously and avoid them if possible.] To do so, each level of an attribute can be defined as a list defining those contraints. In the example below, the `type` attribute has constraints such that only certain price levels will be shown for each level. In addition, for the `"Honeycrisp"` level of the `type` attribute, only two of the three `freshness` levels are included: `"Excellent"` and `"Average"`. Note that both the other attributes (`price` and `freshness`) should contain all of the possible levels. With these constraints, only 30 profiles are available compared to 63 without constraints.
 
 ```{r}
 profiles <- cbc_profiles(
@@ -200,7 +175,9 @@ profiles <- cbc_profiles(
 )
 ```
 
-### Generating random designs
+## Generating designs
+
+### Randomized designs
 
 Once a set of profiles is obtained, a randomized conjoint survey can then be generated using the `cbc_design()` function:
 
@@ -216,9 +193,9 @@ dim(design)  # View dimensions
 head(design) # Preview first 6 rows
 ```
 
-For now, the `cbc_design()` function only generates a randomized design. Other packages, such as the [{idefix}](https://github.com/traets/idefix) package, are able to generate other types of designs, such as Bayesian D-efficient designs. The randomized design simply samples from the set of `profiles`. It also ensures that no two profiles are the same in any choice question.
+For now, the `cbc_design()` function only generates a randomized design. Other packages, such as the [`idefix`](https://github.com/traets/idefix) package, are able to generate other types of designs, including Bayesian D-efficient designs, and future versions of the `cbcTools` package will add a wrapper around the `idefix` package to integrate some of these features. The randomized design simply samples from the set of `profiles` while ensuring that no two profiles are the same in any choice question. 
 
-The resulting `design` data frame includes the following columns:
+The structure of the resulting `design` data frame is such that each row specifies the levels shown for one alternative in a choice question. In addition to the attribute levels, the `design` data frame also includes the following variables for identifying different aspects of the survey:
 
 - `respID`: Identifies each survey respondent.
 - `qID`: Identifies the choice question answered by the respondent.
@@ -228,7 +205,7 @@ The resulting `design` data frame includes the following columns:
 
 ### Labeled designs (a.k.a. "alternative-specific" designs)
 
-You can also make a "labeled" design (also known as "alternative-specific" design) where the levels of one attribute is used as a label by setting the `label` argument to that attribute. This by definition sets the number of alternatives in each question to the number of levels in the chosen attribute, so the `n_alts` argument is overridden. Here is an example labeled survey using the `type` attribute as the label:
+A "labeled" design (also known as an "alternative-specific" design) can also be generated. In labeled designs, the levels of one attribute are used as the labels for each alternative. To do so, the `label` argument can be set to one of the attributes. This by definition also sets the number of alternatives in each question to the number of levels in the chosen attribute, so the `n_alts` argument is overridden. In the example below, the `type` attribute is used as the label:
 
 ```{r}
 design_labeled <- cbc_design(
@@ -243,11 +220,11 @@ dim(design_labeled)
 head(design_labeled)
 ```
 
-In the above example, you can see in the first six rows of the survey that the `type` attribute is always fixed to be the same order, ensuring that each level in the `type` attribute will always be shown in each choice question.
+In the above example, the `type` attribute is now fixed to be the same order for every choice question, ensuring that each level in the `type` attribute will always be shown in each choice question.
 
 ### Adding a "no choice" option (a.k.a. "outside good")
 
-You can include a "no choice" (also known as "outside good" option in your survey by setting `no_choice = TRUE`. If included, all categorical attributes will be dummy-coded to appropriately dummy-code the "no choice" alternative.
+You can include a "no choice" (also known as "outside good") option in the survey by setting `no_choice = TRUE`. If included, all categorical attributes will be dummy-coded to appropriately dummy-code the "no choice" alternative.
 
 ```{r}
 design_nochoice <- cbc_design(
@@ -262,17 +239,15 @@ dim(design_nochoice)
 head(design_nochoice)
 ```
 
-## Inspecting survey designs
+## Inspecting designs
 
-The package includes some functions to quickly inspect some basic metrics of a design.
-
-The `cbc_balance()` function prints out a summary of the counts of each level for each attribute across all choice questions as well as the two-way counts across all pairs of attributes for a given design:
+The package includes some functions to quickly inspect some basic metrics of a design. The `cbc_balance()` function prints out a summary of the counts of each level for each attribute across all choice questions as well as the two-way counts across all pairs of attributes for a given design:
 
 ```{r}
 cbc_balance(design)
 ```
 
-The `cbc_overlap()` function prints out a summary of the amount of "overlap" across attributes within the choice questions. For example, for each attribute, the count under `"1"` is the number of choice questions in which the same level was shown across all alternatives for that attribute (because there was only one level shown). Likewise, the count under `"2"` is the number of choice questions in which only two unique levels of that attribute were shown, and so on:
+Similarly, the `cbc_overlap()` function prints out a summary of the amount of "overlap" across attributes within the choice questions. For example, for each attribute, the count under `"1"` is the number of choice questions in which the same level was shown across all alternatives for that attribute (because there was only one level shown). Likewise, the count under `"2"` is the number of choice questions in which only two unique levels of that attribute were shown, and so on:
 
 ```{r}
 cbc_overlap(design)
@@ -280,7 +255,7 @@ cbc_overlap(design)
 
 ## Simulating choices
 
-You can simulate choices for a given `design` using the `cbc_choices()` function. By default, random choices are simulated:
+Choices for a given `design` can be simulated using the `cbc_choices()` function. By default, random choices are simulated:
 
 ```{r}
 data <- cbc_choices(
@@ -291,7 +266,7 @@ data <- cbc_choices(
 head(data)
 ```
 
-You can also pass a list of prior parameters to define a utility model that will be used to simulate choices. In the example below, the choices are simulated using a utility model with the following parameters:
+Choices can also be simulated according to an assumed prior model. The default model used is a multinomial logit model with fixed parameters. In the example below, the choices are simulated using a utility model with the following parameters:
 
 - 1 continuous parameter for `price`
 - 2 categorical parameters for `type` (`'Gala'` and `'Honeycrisp'`)
@@ -300,7 +275,7 @@ You can also pass a list of prior parameters to define a utility model that will
 Note that for categorical variables (`type` and `freshness` in this example), the first level defined when using `cbc_profiles()` is set as the reference level. The example below defines the following utility model for simulating choices for each alternative _j_:
 
 $$
-u_j = 0.1price_j + 0.1typeGala_j + 0.2typeHoneycrisp_j + 0.1freshnessAverage_j + 0.2freshnessExcellent_j + \varepsilon_j
+u_j = 0.1price_j + 0.1type^\mathrm{Gala}_j + 0.2type^\mathrm{Honeycrisp}_j + 0.1freshness^\mathrm{Average}_j + 0.2freshness^\mathrm{Excellent}_j + \varepsilon_j
 $$
 
 ```{r, eval=FALSE}
@@ -315,34 +290,8 @@ data <- cbc_choices(
 )
 ```
 
+The prior model used for simulating choices can also include other, more complex models, such as models that include interaction terms or mixed logit models. For example, the example below is the same as the previous example but with an added interaction between `price` and `type`:
 
-
-Attribute | Level | Utility 
-----------|-----------
-**Price** | Continuous | -0.1
-**Type**  | Fuji | 0
-          | Gala | 0.1
-          | Honeycrisp  | 0.2
-**Freshness**  | Average | 0
-               | Excellent | 0.1
-               | Poor  | -0.2
-
-
-If you wish to include a prior model with an interaction, you can do so inside the `priors` list. For example, here is the same example as above but with an interaction between `price` and `type` added:
-
-Attribute | Level | Utility 
-----------|-----------
-**Price** | Continuous | -0.1
-**Type**  | Fuji | 0
-          | Gala | 0.1
-          | Honeycrisp  | 0.2
-**Freshness**  | Average | 0
-               | Excellent | 0.1
-               | Poor  | -0.2
-**Price x Type**  | Fuji | 0
-          | Gala | 0.1
-          | Honeycrisp  | 0.5
-          
 ```{r, eval=FALSE}
 data <- cbc_choices(
   design = design,
@@ -356,18 +305,7 @@ data <- cbc_choices(
 )
 ```
 
-Finally, you can also simulate data for a mixed logit model where parameters follow a normal or log-normal distribution across the population. In the example below, the `randN()` function is used to specify the `type` attribute with 2 random normal parameters with a specified vector of means (`mean`) and standard deviations (`sd`) for each level of `type`. Log-normal parameters are specified using `randLN()`.
-
-Attribute | Level | Utility 
-----------|-----------
-**Price** | Continuous | -0.1
-**Type**  | Fuji | 0
-          | Gala | N(0.1, 0.5)
-          | Honeycrisp  | N(0.2, 1)
-**Freshness**  | Average | 0
-               | Excellent | 0.1
-               | Poor  | -0.2
-
+To simulate choices according to a mixed logit model where parameters follow a normal or log-normal distribution across the population, the `randN()` and `randLN()` functions can be used inside the `priors` list. The example below models the `type` attribute with two random normal parameters using a vector of means (`mean`) and standard deviations (`sd`) for each level of `type`:
 
 ```{r, eval=FALSE}
 data <- cbc_choices(
@@ -381,7 +319,7 @@ data <- cbc_choices(
 )
 ```
 
-## Conducting a power analysis
+## Analyzing power
 
 The simulated choice data can be used to conduct a power analysis by estimating the same model multiple times with incrementally increasing sample sizes. As the sample size increases, the estimated coefficient standard errors will decrease (i.e. coefficient estimates become more precise). The `cbc_power()` function achieves this by partitioning the choice data into multiple sizes (defined by the `nbreaks` argument) and then estimating a user-defined choice model on each data subset. In the example below, 10 different sample sizes are used. All models are estimated using the [{logitr}](https://jhelvy.github.io/logitr) package:
 
