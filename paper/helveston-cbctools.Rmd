@@ -52,21 +52,6 @@ kbl(
 ```
 
 ```
-Attribute counts:
-
-brand:
-  GM   BMW  Ferrari 
-  10    11    6 
-
-price:
-
- 20k  40k 100k 
-  9    9   9
-```
-
-
-
-```
 Pairwise attribute counts:
 
 brand & price:
@@ -80,79 +65,60 @@ brand & price:
     Ferrari    6 |  2   4    0
 ```
 
+Based on the counts alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GW and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. But the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
 
-
-# .center[A simple conjoint experiment about _cars_]
-
-Attribute | Levels
-----------|----------
-Brand     | GM, BMW, Ferrari
-Price     | $20k, $40k, $100k
-
-.center[**Design: .red[90] choice sets, .blue[3] alternatives each**]
-
-
-
-```
-Attribute counts:
-
-brand:
-  GM    BMW   Ferrari 
-  92    80     98
-
-price:
-
-  20k  40k 100k 
-  91   84   95 
-```
-
+This rather poor design is a common outcome when using a randomized design with a small number of choice sets. Simply increasing the number of choice sets often results in a much better balance. For example, if we increase the number from 9 to 90, we obtain the following counts:
 
 ```
 Pairwise attribute counts:
 
 brand & price:
-         
-          20k 40k 100k
-  GM      31  31  30
-  BMW     25  25  30
-  Ferrari 35  28  35
+
+                   Price
+                 | 20k 40k 100k
+                 |  91  84   95
+    Brand        |--------------
+    GM        92 |  31  31   30
+    BMW       80 |  25  25   30
+    Ferrari   98 |  35  28   35
 ```
 
-# .center[Bayesian D-efficient designs]
+This design has a much better balance across the attribute levels than the one created from just 9 choice sets. However, it too has issues. Consider, for example, that about 1/3 of the time the Ferrari brand is shown it has a price of just $20,000. This is obviously an unrealistic profile, and if a user saw such a profile multiple times they may not take the choice exercise seriously.
 
-### .center[Maximize information on "Main Effects" according to priors]
-
-Attribute | Levels | Prior
-----------|-------------------|----------
-Brand     | GM, BMW, Ferrari  | 0, 1, 2
-Price     | $20k, $40k, $100k | 0, -1, -4
+One approach to try to correct this outcome is to use a Bayesian D-efficient design. This approach allows the designer to list a set of priors on the expected coefficients for each attribute level and then use an algorithm to select combinations of profiles that maximize the information available to identify main effects.
 
 
-
-```
-Attribute counts:
-
-brand:
-  GM    BMW   Ferrari 
-  93    90     86
-
-price:
-
-  20k  40k 100k 
-  97   93   78
+```{r, echo=FALSE}
+kbl(
+    data.frame(
+        Attribute = c("**Price**", "", "", "**Brand**", "", ""),
+        Level = c("$20,000", "$40,000", "$100,000", "GM", "BMW", "Ferrari"),
+        `Prior (utility)` = c(0, -1, -4, 0, 1, 2)
+    ),
+    booktabs = TRUE,
+    caption = "Example conjoint attributes and levels."
+)
 ```
 
+Using a Bayesian D-efficient design with 90 choice sets and the prior utilities in the table above, the counts become much more reasonable (see Table ##). Now the individual attribute counts are relatively balanced, and the pairwise combinations of attributes are much more plausible. For example, the GM brand is only shown at price levels of $20,000 and $40,000, and about half of the time Ferrari is shown at the $100,000 price level.
 
 ```
 Pairwise attribute counts:
 
 brand & price:
-         
-          20k 40k 100k
-  GM      52  41  0
-  BMW     30  30  30
-  Ferrari 15  22  49
+
+                   Price
+                 | 20k 40k 100k
+                 |  97  93   78
+    Brand        |--------------
+    GM        93 |  52  41   0
+    BMW       90 |  30  30   30
+    Ferrari   86 |  15  22   49
 ```
+
+Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure ## highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs.
+
+
 
 
 # .center[Bayesian D-efficient designs]
