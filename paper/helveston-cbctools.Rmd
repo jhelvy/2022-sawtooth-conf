@@ -4,10 +4,11 @@ author:
 - John Paul Helveston, Ph.D.^[Engineering Management and Systems Engineering, George
   Washington University, Washington, D.C. USA]
 abstract: |
-  Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. Since the package data format matches that of designs exported from Sawtooth Software, it should integrate into the Sawtooth workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
+  Traditional tools for designing choice-based conjoint survey experiments focus on optimizing the design of experiment for statistical power under ideal conditions. But these tools rarely provide guidance on important design decisions for less ideal conditions, such as when preference heterogeneity may be expected in respondent choices or when strong interactions may be expected between certain attributes. The `cbcTools` R package was developed to provide researchers tools for creating and assessing experiment designs and sample size requirements under a variety of different conditions prior to fielding an experiment. The package contains functions for generating experiment designs and surveys as well as functions for simulating choice data and conducting power analyses. The package data format matches that of experiment designs exported from Sawtooth Software, enabling a smooth integration with the Sawtooth Software workflow. Detailed package documentation can be found at https://jhelvy.github.io/cbcTools/.
 output: pdf_document
 bibliography: library.bib
 fontsize: 12pt
+always_allow_html: true
 ---
 
 
@@ -30,14 +31,14 @@ library(gt)
 
 # Introduction 
 
-Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider multiple trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is typically highly iterative.
+Designing a choice-based conjoint survey is almost never a simple, straightforward process. Designers must consider multiple trade offs between design parameters (e.g., which attributes and levels to include, how many choice questions to ask each respondent, and how many alternatives per choice question) and the design outcomes in terms of the user experience and the statistical power available for identifying effects. The process is typically highly iterative [@Johnson2002].
 
 As a quick example, consider a simple conjoint experiment about cars with just two attributes with three levels each: 
 
 - **Price**:  $20,000, 40,000, & 100,000
 - **Brand**: GM, BMW, & Ferrari
 
-A simple starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
+A common starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown, or the design "balance" [@Hauser2005; @Huber1996]. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
 
 ```{r, echo=FALSE}
 kbl(
@@ -54,9 +55,9 @@ kbl(
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-Based on the counts alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GW and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. And the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
+Based on the balance alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GM and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. And the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
 
-This rather poor design is a common outcome when using a randomized design with a small number of choice sets. Simply increasing the number of choice sets often results in a much better balance. For example, if we increase the number from 9 to 90, we obtain the following counts:
+This rather poor design is a common outcome when using a randomized design with a small number of choice sets, and simply increasing the number of choice sets often results in a much better balance [@Kuhfeld2002]. For example, if we increase the number from 9 to 90, we obtain the following counts:
 
 ```{r, echo=FALSE}
 kbl(
@@ -73,10 +74,9 @@ kbl(
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-This design has a much better balance across the attribute levels than the one created from just 9 choice sets. However, it too has issues. Consider, for example, that about 1/3 of the time the Ferrari brand is shown it has a price of just $20,000. This is obviously an unrealistic profile, and if a user saw such a profile multiple times they may not take the choice exercise seriously.
+This design has a much better balance across the attribute levels than the one created from just 9 choice sets, but it too has issues. Consider, for example, that about 1/3 of the time the Ferrari brand is shown it has a price of just $20,000. This is obviously an unrealistic scenario, and if a user saw such a profile multiple times they may not take the choice exercise seriously.
 
-One approach to try to correct this outcome is to use a Bayesian D-efficient design. This approach allows the designer to list a set of priors on the expected coefficients for each attribute level and then use an algorithm to select combinations of profiles that maximize the information available to identify main effects.
-
+As this simple example illustrates, randomly choosing profiles (even with a larger number of choice sets) can still produce flawed designs. An alternative approach is to attempt to identify a statistically optimal design, which is now a rather well-established practice in the literature on discrete choice experiments [@Johnson2013]. Optimal designs maximize the expected Fisher information, which depends on the parameters of the assumed choice model; as a result, a design's efficiency is related to how accuracy the prior guess is to the true parameters. Using a "Bayesian" D-efficient design where the designer can specify prior expected coefficients for each attribute has been proven to outperform other design approaches when sufficient information on the utility model is know [@Kessels2006; @Walker2018].
 
 ```{r, echo=FALSE}
 kbl(
@@ -108,7 +108,7 @@ kbl(
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs. Thus, if interaction effects are expected, a randomized design may be a more appropriate choice.
+Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs. Thus, if interaction effects are expected, a randomized design may be the better choice to ensure that interaction effects can be identified.
 
 ```{r}
 #| echo: FALSE
@@ -120,23 +120,21 @@ knitr::include_graphics("figs/design_compare.png")
 
 # The `cbcTools` Package
 
-As the previous example illustrates, designing a choice-based conjoint experiment is an iterative process, and designers must consider a wide range of factors. The `cbcTools` package was designed as a tool for helping designers navigate this process and to understand the impacts different design decisions could have on the statistical power of the experiment prior to fielding the survey. 
+As the previous example illustrates, designing a choice-based conjoint experiment is an iterative process requiring careful consideration of a variety of factors. The `cbcTools` package was designed as an open source tool to help designers navigate this process and to understand the impacts that different design decisions could have on the outcomes of a choice-based conjoint experiment prior to fielding the survey.
 
-The package provides a set of functions (each starting with `cbc_`) for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. The typical workflow involves a series of steps, and each step has a function associated with it (see Figure 2).
+The package provides a set of functions (each starting with `cbc_`) for designing surveys and conducting power analyses for choice-based conjoint survey experiments in R. Each function is associated with a process in the typical design workflow (see Figure 2). The rest of this paper explains each of these steps using a detailed example.
 
 ```{r}
 #| echo: FALSE
 #| fig.align: 'center'
 #| out.width: "100%"
-#| fig.cap: "Diagram of the choice-based conjoint survey design process."
+#| fig.cap: "Diagram of the choice-based conjoint survey design process and associated package function(s)."
 knitr::include_graphics("figs/program_diagram.png")
 ```
 
-The rest of this paper explains each of these steps using a detailed example of a simple conjoint experiment about apples.
-
 ## Generating profiles
 
-The first step in designing an experiment is to define the attributes and levels for the experiment and then generate all of the `profiles` of each possible combination of those attributes and levels. For example, consider designing a conjoint experiment about apples with the following three attributes: `price`, `type`, and `freshness`. All of the possible profiles for these attributes can be obtained using the `cbc_profiles()` function:
+One of the first steps in designing a conjoint experiment is to define the attributes and levels and then generate all of the `profiles` for each combination of those attributes and levels, often referred to as the "full factorial" design. For example, consider designing a conjoint experiment about apples with the following three attributes: `price`, `type`, and `freshness`. The full factorial set of profiles for these attributes can be obtained using the `cbc_profiles()` function:
 
 ```{r}
 profiles <- cbc_profiles(
@@ -145,12 +143,11 @@ profiles <- cbc_profiles(
   freshness = c('Poor', 'Average', 'Excellent')
 )
 
-nrow(profiles)
 head(profiles)
 tail(profiles)
 ```
 
-Depending on the context of the survey, some profiles may need to be eliminated (e.g., some profile combinations may be illogical or unrealistic).^[Note that including hard constraints in your designs can substantially reduce the statistical power of your design, so use them cautiously and avoid them if possible.] To do so, each level of an attribute can be defined as a list defining those contraints. In the example below, the `type` attribute has constraints such that only certain price levels will be shown for each level. In addition, for the `"Honeycrisp"` level of the `type` attribute, only two of the three `freshness` levels are included: `"Excellent"` and `"Average"`. Note that both the other attributes (`price` and `freshness`) should contain all of the possible levels. With these constraints, only 30 profiles are available compared to 63 without constraints.
+The resulting data frame, `profiles`, has 63 rows, each defining a unique profile. Depending on the context of the survey, some profiles may need to be eliminated (e.g., some profile combinations may be illogical or unrealistic).^[Note that including hard constraints in your designs can substantially reduce the statistical power of your design, so use them cautiously and avoid them if possible.] To do so, each level of an attribute can be defined as a list defining those constraints. In the example below, the `type` attribute has constraints such that only certain price levels will be shown for each level. In addition, for the `"Honeycrisp"` level of the `type` attribute, only two of the three `freshness` levels are included: `"Excellent"` and `"Average"`. Note that both the other attributes (`price` and `freshness`) should contain all of the possible levels. With these constraints, only 30 profiles are available compared to 63 without constraints.
 
 ```{r}
 profiles <- cbc_profiles(
@@ -170,7 +167,6 @@ profiles <- cbc_profiles(
   )
 )
 
-nrow(profiles)
 head(profiles)
 tail(profiles)
 ```
