@@ -38,7 +38,9 @@ As a quick example, consider a simple conjoint experiment about cars with just t
 - **Price**:  $20,000, 40,000, & 100,000
 - **Brand**: GM, BMW, & Ferrari
 
-A common starting point is to generate a design by randomly choosing combinations of brands and prices from the full set of all possible profiles. Once created, one of the first things designers examine is the count of how often each level of each attribute is shown, or the design "balance" [@Hauser2005; @Huber1996]. The table below shows an example of the counts from a random design with 9 choice sets of 3 alternatives per question:
+A common starting point is to first generate the full factorial set of all possible combinations of brand and price. These profiles can then be selected into a survey design from which respondents will make choices. Without any prior knowledge or experience about car prices and brands, a designer may simply choose to create a survey design by randomly selecting profiles from the full factorial set of profiles. This often results in a less efficient design, but it is a starting point for illustrating trade offs in making a design.
+
+Once a survey design is created, one of the first things designers examine is the count of how often each level of each attribute is shown, or the design "balance" [@Hauser2005; @Huber1996]. The table below shows an example of the counts from a design with just 9 choice sets of 3 alternatives per question, each of which were randomly chosen from the full factorial set of profiles:
 
 ```{r, echo=FALSE}
 kbl(
@@ -57,7 +59,7 @@ kbl(
 
 Based on the balance alone, it is clear that this design has several problems. First, while the price levels are perfectly balanced (each level is shown 9 times), the brand levels are not -- GM and BMW are shown 10 and 11 times, respectively, whereas Ferrari is only shown 6 times. And the pairwise counts are particularly troubling. The Ferrari brand is only shown with a price of $20,000 and $40,000 and never at the $100,000 level (the most logical level for a Ferrari!). Likewise, GM brand is shown with a price of $100,000 in 7 out of 10 times and never with a price of $40,000.
 
-This rather poor design is a common outcome when using a randomized design with a small number of choice sets, and simply increasing the number of choice sets often results in a much better balance [@Kuhfeld2002]. For example, if we increase the number from 9 to 90, we obtain the following counts:
+This rather poor design is a common outcome when generating a design by randomly selecting profiles from the full factorial with only a limited number of choice sets. One way to improve the outcome is to simply increase the number of choice sets used, which often results in a much better balance [@Kuhfeld2002]. For example, if we increase the number of choice sets from 9 to 90, we obtain the following counts:
 
 ```{r, echo=FALSE}
 kbl(
@@ -76,7 +78,7 @@ kbl(
 
 This design has a much better balance across the attribute levels than the one created from just 9 choice sets, but it too has issues. Consider, for example, that about 1/3 of the time the Ferrari brand is shown it has a price of just $20,000. This is obviously an unrealistic scenario, and if a user saw such a profile multiple times they may not take the choice exercise seriously.
 
-As this simple example illustrates, randomly choosing profiles (even with a larger number of choice sets) can still produce flawed designs. An alternative approach is to attempt to identify a statistically optimal design, which is now a rather well-established practice in the literature on discrete choice experiments [@Johnson2013]. Optimal designs maximize the expected Fisher information, which depends on the parameters of the assumed choice model; as a result, a design's efficiency is related to how accuracy the prior guess is to the true parameters. Using a "Bayesian" D-efficient design where the designer can specify prior expected coefficients for each attribute has been proven to outperform other design approaches when sufficient information on the utility model is know [@Kessels2006; @Walker2018].
+As this simple example illustrates, randomly selecting profiles (even with a larger number of choice sets) can still produce a flawed design^[Note that randomly selecting profiles is different from the kinds of "randomized" designs Sawtooth Software generates, where respondents are randomly assigned to blocks in the experiment which later are _not_ randomly constructed.]. An alternative approach is to attempt to identify a statistically optimal design, which is now a rather well-established practice in the literature on discrete choice experiments [@Johnson2013]. Optimal designs maximize the expected Fisher information, which depends on the parameters of the assumed choice model. As a result, a design's efficiency is related to how accuracy the prior guess is to the true parameters. Using a "Bayesian" D-efficient design where the designer can specify prior expected coefficients for each attribute has been proven to outperform other design approaches when sufficient information on the utility model is known [@Kessels2006; @Walker2018].
 
 ```{r, echo=FALSE}
 kbl(
@@ -108,7 +110,9 @@ kbl(
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
-Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes. Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs. Thus, if interaction effects are expected, a randomized design may be the better choice to ensure that interaction effects can be identified.
+Of course, even Bayesian D-efficient designs have their downsides. In particular, they can become problematic if there are significant interaction effects between any of the attributes that the designer did not anticipate. 
+
+Figure 1 highlights this trade off. The plots show the standard errors of each coefficients from the same model estimated using increasing subsets of two simulated data sets: a randomized design and a Bayesian D-efficient design. In the first row, it is clear that the D-efficient design produces lower standard errors for the same sample size compared to the randomized design. However, the second row shows the standard errors on interaction effects, which are not identifiable using the D-efficient design. This is because interaction effects can become confounded with main effects in D-efficient designs where the designer did not consider interactions in their priors. Thus, the accuracy of the designer's prior model used in obtaining a D-efficient design is an important factor in the overall performance of the design. If little to no prior information is known and interactions may be present, a fully randomized design may be a better choice, though of course this would require larger sample sizes to obtain significant parameter estimates.
 
 ```{r}
 #| echo: FALSE
