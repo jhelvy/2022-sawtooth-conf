@@ -68,14 +68,6 @@ meta() %>%
     twitter_card_type = "summary_large_image",
     twitter_creator = "@johnhelveston"
   )
-
-knitr::opts_chunk$set(
-    warning = FALSE,
-    message = FALSE,
-    comment = "#>",
-    fig.path = "figs/",
-    fig.retina = 3 # Better figure resolution
-)
 ```
 
 layout: true
