@@ -8,6 +8,11 @@ library(tidyverse)
 library(fastDummies)
 
 # Define the attributes and levels
+levels <- list(
+    brand = c("GM", "BMW", "Ferrari"),
+    price = c("20k", "40k", "100k")
+)
+
 profiles <- cbc_profiles(
     brand = c("GM", "BMW", "Ferrari"),
     price = c("20k", "40k", "100k")
